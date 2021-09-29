@@ -1,4 +1,7 @@
-﻿using System;
+﻿using System.Drawing;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DataCollectorAndProcessor
 {
@@ -6,8 +9,10 @@ namespace DataCollectorAndProcessor
     {
         static void Main(string[] args)
         {
-            
-            Console.WriteLine("Hello World!");
+
+
+            //TODO: Logic about downloading and parsing files using ImageParser
+
         }
     }
 }
