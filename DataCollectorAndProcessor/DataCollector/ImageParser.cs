@@ -42,5 +42,17 @@ namespace DataCollectorAndProcessor
         {
             await stream.WriteAsync(Encoding.UTF8.GetBytes($"{x},{y},{pixelValue.R:X2}{pixelValue.G:X2}{pixelValue.B:X2}"));
         }
+
+        public static Bitmap ParseImageStream(Stream imageStream)
+        {
+            FREE_IMAGE_FORMAT format = FREE_IMAGE_FORMAT.FIF_JP2;
+            var image = FreeImage.LoadFromStream(imageStream, FREE_IMAGE_LOAD_FLAGS.DEFAULT, ref format);
+            var imageOutStream = new MemoryStream();
+            if (!FreeImage.SaveToStream(image, imageOutStream, FREE_IMAGE_FORMAT.FIF_JPEG))
+            {
+                throw new FormatException("Image could not be converted to JPEG");
+            }
+            return new Bitmap(imageOutStream);
+        }
     }
 }

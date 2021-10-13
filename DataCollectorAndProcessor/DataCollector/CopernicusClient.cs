@@ -6,12 +6,13 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Xml;
 using DataCollector.CopernicusDataStructures;
+using DataCollectorAndProcessor;
 
 namespace DataCollector
 {
     public class CopernicusClient
     {
-        private readonly HttpClient client = new HttpClient();
+        private HttpClient _client = new HttpClient();
 
         private readonly string DataAPI = ConfigurationManager.AppSettings.Get("DataAPI");
         private readonly string APIAuth = ConfigurationManager.AppSettings.Get("APIAuth");
@@ -32,9 +33,14 @@ namespace DataCollector
 
                 var imageId = await GetImageId(titleAndId, granuleFolderName);
 
-                var response = await client.GetAsync($"{DataAPI}/odata/v1/Products('{titleAndId.Item2}')" +
+                var response = await _client.GetAsync($"{DataAPI}/odata/v1/Products('{titleAndId.Item2}')" +
                                                      $"/Nodes('{titleAndId.Item1}.SAFE')/Nodes('GRANULE')/Nodes('{granuleFolderName}')/Nodes('IMG_DATA')" +
                                                      $"/Nodes('R10m')/Nodes('{imageId}')/$value");
+                response.EnsureSuccessStatusCode();
+                Console.WriteLine("Got an image");
+                var bitmap = ImageParser.ParseImageStream(await response.Content.ReadAsStreamAsync());
+                
+                Console.WriteLine($"{bitmap.Height} {bitmap.Width}");
             }
             catch (Exception e)
             {
@@ -46,7 +52,7 @@ namespace DataCollector
         private async Task<string> GetImageId((string, Guid) titleAndId, string granuleFolderName)
         {
             string imageId = null;
-            var response1 = await client.GetAsync($"{DataAPI}/odata/v1/Products('{titleAndId.Item2}')" +
+            var response1 = await _client.GetAsync($"{DataAPI}/odata/v1/Products('{titleAndId.Item2}')" +
                                                   $"/Nodes('{titleAndId.Item1}.SAFE')/Nodes('GRANULE')/Nodes('{granuleFolderName}')/Nodes('IMG_DATA')" +
                                                   $"/Nodes('R10m')/Nodes");
             var xml = new XmlDocument();
@@ -71,7 +77,7 @@ namespace DataCollector
         private async Task<string> GetGranuleFolderName((string, Guid) titleAndId)
         {
             var response =
-                await client.GetAsync(
+                await _client.GetAsync(
                     $"{DataAPI}/odata/v1/Products('{titleAndId.Item2}')/Nodes('{titleAndId.Item1}.SAFE')/Nodes('GRANULE')/Nodes");
             var xml = new XmlDocument();
             xml.LoadXml(await response.Content.ReadAsStringAsync());
@@ -82,8 +88,9 @@ namespace DataCollector
 
         private async Task<SearchResult> GetSearchResult()
         {
-            this.client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(APIAuth);
-            var response = await client.GetAsync(
+            this._client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(APIAuth);
+            _client.Timeout = new TimeSpan(0, 10, 0);
+            var response = await _client.GetAsync(
                 $"{DataAPI}/search?q=(footprint:\"Intersects({SearchArea})\" AND platformname:Sentinel-2 AND" +
                 $" processinglevel:Level-2A AND platformserialidentifier:Sentinel-2B AND" +
                 $" ingestiondate:[NOW-1{SearchInterval} TO NOW])"); // AND cloudcoverpercentage:[0 TO 50]
