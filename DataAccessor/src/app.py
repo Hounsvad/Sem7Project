@@ -12,7 +12,7 @@ def index():
             content = request.get_json(silent=True)
             longtitude = content['longtitude']
             latitude = content['latitude']
-            cur.execute("select value from nvdi where date = (select latestDate from latestDate) and x1 <= ? and x2 >= ? and y1 <= ? and y2 >= ?,", (latitude, latitude, longtitude, longtitude))
+            cur.execute("select value from nvdi where date = (select latestDate from latestDate) and x1 <= ? and x2 >= ? and y1 <= ? and y2 >= ? limit 1", (latitude, latitude, longtitude, longtitude))
             return cur.fetchone()
         except:
             return "", 404
