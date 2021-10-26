@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataCollector", "DataCollec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Processor", "Processor\Processor.csproj", "{2B4502E0-C381-4BB4-82B1-1997A4DA168C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{80C14454-3D07-4F8C-B65E-E9FF25748ACB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2B4502E0-C381-4BB4-82B1-1997A4DA168C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B4502E0-C381-4BB4-82B1-1997A4DA168C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B4502E0-C381-4BB4-82B1-1997A4DA168C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80C14454-3D07-4F8C-B65E-E9FF25748ACB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80C14454-3D07-4F8C-B65E-E9FF25748ACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80C14454-3D07-4F8C-B65E-E9FF25748ACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80C14454-3D07-4F8C-B65E-E9FF25748ACB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
