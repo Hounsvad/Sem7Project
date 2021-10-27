@@ -30,7 +30,11 @@ namespace DataCollector
 
         private static void Loop(object sender)
         {
-            Task.Run(() => _copernicusClient.Execute());
+            Task.Run(async () =>
+            {
+                var ndvis = await _copernicusClient.Execute();
+                
+            });
         }
     }
 }

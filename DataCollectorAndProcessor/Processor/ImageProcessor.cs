@@ -15,7 +15,7 @@ namespace Sem7.Input.Processor
             var maxLength = nearInfrared.Height * nearInfrared.Width;
             var pixels = new NDVIPixel[maxLength];
 
-            var mapping = Mapping.( imagePolygon);
+            //var mapping = Mapping.( imagePolygon);
             
             for (int height = 0; height < nearInfrared.Height; height++)
             { 
