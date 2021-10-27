@@ -9,25 +9,27 @@ using System.Xml;
 using DataCollector.CopernicusDataStructures;
 using DataCollectorAndProcessor;
 using Sem7.Input.Common;
+using Sem7.Input.Processor;
 
 namespace DataCollector
 {
     public class CopernicusClient
     {
         private HttpClient _client = new HttpClient();
+        private IImageProcessor _processor = new ImageProcessor();
 
         private readonly string DataAPI = ConfigurationManager.AppSettings.Get("DataAPI");
         private readonly string APIAuth = ConfigurationManager.AppSettings.Get("APIAuth");
         private readonly string SearchArea = ConfigurationManager.AppSettings.Get("SearchArea");
         private readonly string SearchInterval = ConfigurationManager.AppSettings.Get("CopernicusSearchInterval");
-        
-        public async Task Execute()
+
+        public async Task<NDVIPixel[]> Execute()
         {
             try
             {
                 var searchResult = await GetSearchResult();
 
-                if (!searchResult.FoundResults()) return;
+                if (!searchResult.FoundResults()) return null;
 
                 var titleAndId = searchResult.GetTitleAndIdOfFirstEntry();
 
@@ -44,13 +46,22 @@ namespace DataCollector
 
                 var bitmapB04 = ImageParser.ParseImageStream(imageStreamB04);
                 var bitmapB08 = ImageParser.ParseImageStream(imageStreamB08);
-                
+
+                var ndvis = await _processor.ProcessImageToNdviPixels(
+                    bitmapB04, 
+                    bitmapB08, 
+                    polygon, 
+                    boundingCoordinates.Item1,
+                    boundingCoordinates.Item2);
+
+                return ndvis;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message + e.StackTrace);
             }
 
+            return null;
         }
 
         private async Task<Stream> GetImageStream((string, Guid) titleAndId, string granuleFolderName, string imageId)

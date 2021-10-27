@@ -16,7 +16,6 @@ namespace Sem7.Input.Processor
             var pixels = new List<NDVIPixel>(maxLength);
             int pixelIndex = 0;
             var mapping = Mapping.MappingFactory(topLeft, bottomRight, nearInfrared.Width, nearInfrared.Height);
-            
             for (int height = 0; height < nearInfrared.Height; height++)
             { 
                 for (int width = 0; width < nearInfrared.Width; width++)

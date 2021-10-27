@@ -8,7 +8,7 @@ using Sem7.Input.Common;
 
 namespace Sem7.Input.Processor
 {
-    interface IImageProcessor
+    public interface IImageProcessor
     {
         /// <summary>
         /// Returns NDVI values for all pixels, by their individual pixels.
