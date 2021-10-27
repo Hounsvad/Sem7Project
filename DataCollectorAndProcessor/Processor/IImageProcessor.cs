@@ -17,6 +17,7 @@ namespace Sem7.Input.Processor
         /// <param name="infrared">Bitmap of the early infrared spectrum. B08 on Copernicus Sentinel 2 MIR A2</param>
         /// <param name="imagePolygon">List of coordinates making up the corners of the image, coordinates listed as Lattitude, Longtitude, with excately 6 digits of accuracy after the comma</param>
         /// <returns><see cref="NDVIPixel"/></returns>
-        public Task<NDVIPixel[]> ProcessImageToNdviPixels(Bitmap nearInfrared, Bitmap infrared, List<(int, int)> imagePolygon);
+        public Task<NDVIPixel[]> ProcessImageToNdviPixels(Bitmap nearInfrared, Bitmap infrared,
+            List<Coordinate> imagePolygon, Coordinate topLeft, Coordinate bottomRight);
     }
 }
