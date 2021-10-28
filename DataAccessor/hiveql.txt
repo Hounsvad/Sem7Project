@@ -1,0 +1,14 @@
+# <-- is comments
+# Connect to the docker container
+docker exec -ti hive-server beeline
+
+# Connect to hive
+!connect jdbc:hive2://localhost:10000
+# Use "hive" for user and password!
+
+create table if not exists ndvi (entrydate string, x1 INT, x2 INT, y1 INT, y2 INT, value SMALLINT, PRIMARY KEY (entrydate, x1, x2, y1, y2) disable novalidate);
+
+create table if not exists latestdate (latestdate string);
+
+insert into ndvi (entrydate, x1, x2, y1, y2, value) values ('2021-10-27', 10192956, 10668743, 55233606, 55503501, 32);
+insert into latestdate (latestdate) values ('2021-10-27');
