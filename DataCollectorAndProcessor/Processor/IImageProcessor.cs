@@ -13,11 +13,11 @@ namespace Sem7.Input.Processor
         /// <summary>
         /// Returns NDVI values for all pixels, by their individual pixels.
         /// </summary>
-        /// <param name="nearInfrared">Bitmap of the near infrared spectrum B04 on Copernicus Sentinel 2 MIR A2</param>
-        /// <param name="infrared">Bitmap of the early infrared spectrum. B08 on Copernicus Sentinel 2 MIR A2</param>
+        /// <param name="red">Bitmap of the near infrared spectrum B04 on Copernicus Sentinel 2 MIR A2</param>
+        /// <param name="nearInfrared">Bitmap of the early infrared spectrum. B08 on Copernicus Sentinel 2 MIR A2</param>
         /// <param name="imagePolygon">List of coordinates making up the corners of the image, coordinates listed as Lattitude, Longtitude, with excately 6 digits of accuracy after the comma</param>
         /// <returns><see cref="NDVIPixel"/></returns>
-        public Task<NDVIPixel[]> ProcessImageToNdviPixels(Bitmap nearInfrared, Bitmap infrared,
+        public Task<NDVIPixel[]> ProcessImageToNdviPixels(Bitmap red, Bitmap nearInfrared,
             List<Coordinate> imagePolygon, Coordinate topLeft, Coordinate bottomRight);
     }
 }

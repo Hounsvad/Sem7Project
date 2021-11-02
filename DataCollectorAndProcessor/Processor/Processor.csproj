@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Hadoop.Client" Version="1.5.13" />
+    <PackageReference Include="Microsoft.Hadoop.MapReduce" Version="0.12.5807.28193" />
+    <PackageReference Include="Microsoft.Spark" Version="2.0.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
 

@@ -10,20 +10,20 @@ namespace Sem7.Input.Processor
     {
         
         /// <inheritdoc cref="IImageProcessor.ProcessImageToNdviPixels"/>
-        public async Task<NDVIPixel[]> ProcessImageToNdviPixels(Bitmap nearInfrared, Bitmap infrared, List<Coordinate> imagePolygon, Coordinate topLeft, Coordinate bottomRight)
+        public async Task<NDVIPixel[]> ProcessImageToNdviPixels(Bitmap red, Bitmap nearInfrared, List<Coordinate> imagePolygon, Coordinate topLeft, Coordinate bottomRight)
         {
-            var maxLength = nearInfrared.Height * nearInfrared.Width;
+            var maxLength = red.Height * red.Width;
             var pixels = new List<NDVIPixel>(maxLength);
             int pixelIndex = 0;
-            var mapping = Mapping.MappingFactory(topLeft, bottomRight, nearInfrared.Width, nearInfrared.Height);
-            for (int height = 0; height < nearInfrared.Height; height++)
+            var mapping = Mapping.MappingFactory(topLeft, bottomRight, red.Width, red.Height);
+            for (int height = 0; height < red.Height; height++)
             { 
-                for (int width = 0; width < nearInfrared.Width; width++)
+                for (int width = 0; width < red.Width; width++)
                 {
+                    var redIntensity = red.GetPixel(width, height).R;
                     var nearInfraredIntensity = nearInfrared.GetPixel(width, height).R;
-                    var infraredIntensity = infrared.GetPixel(width, height).R;
-                    var ndvi = (infraredIntensity - nearInfraredIntensity) /
-                               (infraredIntensity + nearInfraredIntensity);
+                    var ndvi = (nearInfraredIntensity - redIntensity) /
+                               (nearInfraredIntensity + redIntensity);
                     mapping.MapPixel(width, height, out var topLeftCoordinate, out var bottomRightCoordinate);
                     
                     var pixel = new NDVIPixel((sbyte)(ndvi*100), topLeftCoordinate, bottomRightCoordinate);
