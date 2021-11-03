@@ -11,6 +11,7 @@ using Microsoft.Spark;
 using Microsoft.Spark.Sql;
 using Microsoft.Spark.Sql.Types;
 using Sem7.Input.Common;
+using static Microsoft.Spark.Sql.Functions;
 
 namespace Sem7.Input.Processor
 {
@@ -31,14 +32,16 @@ namespace Sem7.Input.Processor
 
             var spark = SparkSession.Builder().AppName("WordCountSample").GetOrCreate();
 
-            var redImageDataFrame = spark.Read().Format("image").Load(hdfsImageIngestPath + redImage.Split('/'));
-            var nirImageDataFrame = spark.Read().Format("image").Load(hdfsImageIngestPath + nirImage.Split('/'));
+            var redImageDF = spark.Read().Format("image").Load(hdfsImageIngestPath + redImage.Split('/'));
+            var nirImageDF = spark.Read().Format("image").Load(hdfsImageIngestPath + nirImage.Split('/'));
 
             var mapping = Mapping.MappingFactory(topLeft, bottomRight, red.Width, red.Height);
 
             RegisterUdfs(spark, mapping);
-            
-            redImageDataFrame.Select(Microsoft.Spark.Sql.)
+
+            DataFrame df = redImageDF.Select()
+
+            redImageDF.SelectExpr("select convertToPixels(image.height, image.width, image.data  )");
         }
 
         private void RegisterUdfs(SparkSession spark, Mapping mapping)
@@ -54,6 +57,7 @@ namespace Sem7.Input.Processor
             });
         }
 
+        
         private (int, int, byte)[] ConvertImageDataToPixels(int height, int width, byte[] data)
         {
             var pixels = new (int, int, byte)[data.Length / 3];
