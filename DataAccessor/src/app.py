@@ -11,11 +11,11 @@ def index():
     with conn.cursor() as cur:
         try:
             content = request.get_json(silent=True)
-            longtitude = int(content['longtitude'])
+            longitude = int(content['longitude'])
             latitude = int(content['latitude'])
             cur.execute("select latestdate from latestdate")
             latestdate = cur.fetchone()[0]
-            cur.execute("select value from ndvi where entrydate = %s and x1 <= %d and x2 >= %d and y1 <= %d and y2 >= %d limit 1", (latestdate, latitude, latitude, longtitude, longtitude))
+            cur.execute("select value from ndvi where entrydate = %s and x1 <= %d and x2 >= %d and y1 <= %d and y2 >= %d limit 1", (latestdate, latitude, latitude, longitude, longitude))
             return str(cur.fetchone()[0])
         except:
             traceback.print_exc()
