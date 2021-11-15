@@ -45,9 +45,9 @@ namespace DataCollectorAndProcessor
             await stream.WriteAsync(Encoding.UTF8.GetBytes($"{x},{y},{pixelValue.R:X2}{pixelValue.G:X2}{pixelValue.B:X2}"));
         }
 
-        public static async Task ParseImageStream(Stream imageStream)
+        public static async Task ParseImageStream(Stream imageStream, string outPath)
         {
-            var tmpImgPath = Path.GetTempFileName();
+            var tmpImgPath = Path.GetTempFileName().Replace(".tmp", ".jp2");
             var img = File.OpenWrite(tmpImgPath);
             await imageStream.CopyToAsync(img);
             var python = new Process()
@@ -55,7 +55,7 @@ namespace DataCollectorAndProcessor
                 StartInfo =
                 {
                     FileName = "python3",
-                    ArgumentList = { ConfigurationManager.AppSettings.Get("pythonImg"), tmpImgPath, ConfigurationManager.AppSettings.Get("hdfsImageIngestPath")}
+                    ArgumentList = { ConfigurationManager.AppSettings.Get("pythonImg"), tmpImgPath, outPath}
                 }
             };
             python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};

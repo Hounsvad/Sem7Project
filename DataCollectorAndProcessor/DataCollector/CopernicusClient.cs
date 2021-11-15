@@ -47,8 +47,8 @@ namespace DataCollector
                 var imageStreamB08 = await GetImageStream(titleAndId, granuleFolderName, imageB08Id);
 
                 Console.WriteLine("Reformatting images in python");
-                await ImageParser.ParseImageStream(imageStreamB04);
-                await ImageParser.ParseImageStream(imageStreamB08);
+                await ImageParser.ParseImageStream(imageStreamB04, ConfigurationManager.AppSettings.Get("hdfsImageIngestPath") + "/" + ConfigurationManager.AppSettings.Get("Rout.jpg"));
+                await ImageParser.ParseImageStream(imageStreamB08, ConfigurationManager.AppSettings.Get("hdfsImageIngestPath") + "/" + ConfigurationManager.AppSettings.Get("IRout.jpg"));
 
                 var args = await CreatePythonArgs(boundingCoordinates, polygon);
 
