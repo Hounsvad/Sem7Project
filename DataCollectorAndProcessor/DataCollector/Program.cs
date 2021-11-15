@@ -2,14 +2,12 @@
 using System.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
-using Sem7.Input.DataCollector;
 
 namespace DataCollector
 {
     class Program
     {
         private static CopernicusClient _copernicusClient = new CopernicusClient();
-        private static KafkaClient _kafkaClient = new KafkaClient();
         
         static void Main(string[] args)
         {
@@ -31,11 +29,7 @@ namespace DataCollector
 
         private static void Loop(object sender)
         {
-            Task.Run(async () =>
-            {
-                var ndvis = await _copernicusClient.Execute();
-                await _kafkaClient.Produce(ndvis);
-            });
+            Task.Run(_copernicusClient.Execute);
         }
     }
 }

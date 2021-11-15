@@ -29,15 +29,19 @@ namespace Sem7.Input.Common
         {
             decimal _lattitude = (decimal) lattitude;
             decimal _longtitude = (decimal) longtitude;
-            Lattitude = (int)Math.Floor(_lattitude * 1000000m);
-            Longtitude = (int)Math.Floor(_longtitude * 1000000m);
+            Lattitude = (int) Math.Floor(_lattitude * 1000000m);
+            Longtitude = (int) Math.Floor(_longtitude * 1000000m);
         }
 
         public Coordinate(string lattitude, string longtitude)
         {
-            Lattitude = int.Parse(lattitude.Split('.')[0] + lattitude.Split('.')[1].Substring(0,6));
+            Lattitude = int.Parse(lattitude.Split('.')[0] + lattitude.Split('.')[1].Substring(0, 6));
             Longtitude = int.Parse(longtitude.Split('.')[0] + longtitude.Split('.')[1].Substring(0, 6));
+        }
 
+        public JsonCoordinate ToJson()
+        {
+            return new JsonCoordinate() {lat = this.Lattitude.ToString(), @long = this.Longtitude.ToString()};
         }
     }
 }

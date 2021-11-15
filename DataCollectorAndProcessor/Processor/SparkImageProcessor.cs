@@ -39,9 +39,10 @@ namespace Sem7.Input.Processor
 
             RegisterUdfs(spark, mapping);
 
-            DataFrame df = redImageDF.Select()
+            DataFrame df = redImageDF.Select();
 
             redImageDF.SelectExpr("select convertToPixels(image.height, image.width, image.data  )");
+            return null;
         }
 
         private void RegisterUdfs(SparkSession spark, Mapping mapping)

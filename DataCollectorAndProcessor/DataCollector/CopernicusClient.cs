@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -8,28 +9,28 @@ using System.Threading.Tasks;
 using System.Xml;
 using DataCollector.CopernicusDataStructures;
 using DataCollectorAndProcessor;
+using Newtonsoft.Json;
 using Sem7.Input.Common;
-using Sem7.Input.Processor;
+using Sem7.Input.DataCollector;
 
 namespace DataCollector
 {
     public class CopernicusClient
     {
         private HttpClient _client = new HttpClient();
-        private IImageProcessor _processor = new ImageProcessor();
 
         private readonly string DataAPI = ConfigurationManager.AppSettings.Get("DataAPI");
         private readonly string APIAuth = ConfigurationManager.AppSettings.Get("APIAuth");
         private readonly string SearchArea = ConfigurationManager.AppSettings.Get("SearchArea");
         private readonly string SearchInterval = ConfigurationManager.AppSettings.Get("CopernicusSearchInterval");
 
-        public async Task<NDVIPixel[]> Execute()
+        public async Task Execute()
         {
             try
             {
                 var searchResult = await GetSearchResult();
 
-                if (!searchResult.FoundResults()) return null;
+                if (!searchResult.FoundResults()) return;
 
                 var titleAndId = searchResult.GetTitleAndIdOfFirstEntry();
 
@@ -47,21 +48,36 @@ namespace DataCollector
                 var bitmapB04 = ImageParser.ParseImageStream(imageStreamB04);
                 var bitmapB08 = ImageParser.ParseImageStream(imageStreamB08);
 
-                var ndvis = await _processor.ProcessImageToNdviPixels(
-                    bitmapB04, 
-                    bitmapB08, 
-                    polygon, 
-                    boundingCoordinates.Item1,
-                    boundingCoordinates.Item2);
+                var appSettings = ConfigLoader.LoadFromAppConfig();
+                var tempPath = Path.GetTempFileName();
+                using (var writer = new StreamWriter(File.OpenWrite(tempPath)))
+                {
+                    var jsonAppSettings = JsonConvert.SerializeObject(appSettings);
+                    await writer.WriteAsync(jsonAppSettings);
+                    writer.Close();
+                }
 
-                return ndvis;
+                var args = ConfigLoader.CreateArgsForPython(tempPath,
+                    boundingCoordinates.Item1.Lattitude,
+                    boundingCoordinates.Item2.Lattitude,
+                    boundingCoordinates.Item1.Longtitude,
+                    boundingCoordinates.Item2.Longtitude,
+                    polygon);
+
+                var python = new Process()
+                {
+                    StartInfo =
+                    {
+                        FileName = ConfigurationManager.AppSettings.Get("pythonProcessor"),
+                        Arguments = args
+                    }
+                };
+                python.Start();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message + e.StackTrace);
             }
-
-            return null;
         }
 
         private async Task<Stream> GetImageStream((string, Guid) titleAndId, string granuleFolderName, string imageId)
