@@ -1,6 +1,8 @@
 ﻿using FreeImageAPI;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -43,16 +45,23 @@ namespace DataCollectorAndProcessor
             await stream.WriteAsync(Encoding.UTF8.GetBytes($"{x},{y},{pixelValue.R:X2}{pixelValue.G:X2}{pixelValue.B:X2}"));
         }
 
-        public static Bitmap ParseImageStream(Stream imageStream)
+        public static async Task ParseImageStream(Stream imageStream)
         {
-            FREE_IMAGE_FORMAT format = FREE_IMAGE_FORMAT.FIF_JP2;
-            var image = FreeImage.LoadFromStream(imageStream, FREE_IMAGE_LOAD_FLAGS.DEFAULT, ref format);
-            var imageOutStream = new MemoryStream();
-            if (!FreeImage.SaveToStream(image, imageOutStream, FREE_IMAGE_FORMAT.FIF_JPEG))
+            var tmpImgPath = Path.GetTempFileName();
+            var img = File.OpenWrite(tmpImgPath);
+            await imageStream.CopyToAsync(img);
+            var python = new Process()
             {
-                throw new FormatException("Image could not be converted to JPEG");
-            }
-            return new Bitmap(imageOutStream);
+                StartInfo =
+                {
+                    FileName = ConfigurationManager.AppSettings.Get("pythonImg"),
+                    ArgumentList = {tmpImgPath, ConfigurationManager.AppSettings.Get("hdfsImageIngestPath")}
+                }
+            };
+            python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
+            python.OutputDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
+            python.Start();
+            await python.WaitForExitAsync();
         }
     }
 }

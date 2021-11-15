@@ -107,12 +107,12 @@ def validateConfigContents(config: dict):
 if __name__ == '__main__':
     print('Python doing stuff')
     # Validate Input
-    if len(sys.argv) < 1:
+    if len(sys.argv) < 2:
         print("Needs json configuration")
         exit(1)
 
     # Extract Args As Json
-    args: dict = json.loads(sys.argv[0])
+    args: dict = json.loads(sys.argv[1])
 
     # Validate Args exists
     validateArgsContents()

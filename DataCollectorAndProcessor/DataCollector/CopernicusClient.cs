@@ -45,24 +45,10 @@ namespace DataCollector
                 var imageStreamB04 = await GetImageStream(titleAndId, granuleFolderName, imageB04Id);
                 var imageStreamB08 = await GetImageStream(titleAndId, granuleFolderName, imageB08Id);
 
-                var bitmapB04 = ImageParser.ParseImageStream(imageStreamB04);
-                var bitmapB08 = ImageParser.ParseImageStream(imageStreamB08);
+                await ImageParser.ParseImageStream(imageStreamB04);
+                await ImageParser.ParseImageStream(imageStreamB08);
 
-                var appSettings = ConfigLoader.LoadFromAppConfig();
-                var tempPath = Path.GetTempFileName();
-                using (var writer = new StreamWriter(File.OpenWrite(tempPath)))
-                {
-                    var jsonAppSettings = JsonConvert.SerializeObject(appSettings);
-                    await writer.WriteAsync(jsonAppSettings);
-                    writer.Close();
-                }
-
-                var args = ConfigLoader.CreateArgsForPython(tempPath,
-                    boundingCoordinates.Item1.Lattitude,
-                    boundingCoordinates.Item2.Lattitude,
-                    boundingCoordinates.Item1.Longtitude,
-                    boundingCoordinates.Item2.Longtitude,
-                    polygon);
+                var args = await CreatePythonArgs(boundingCoordinates, polygon);
 
                 var python = new Process()
                 {
@@ -81,6 +67,26 @@ namespace DataCollector
             {
                 Console.WriteLine(e.Message + e.StackTrace);
             }
+        }
+
+        private static async Task<string> CreatePythonArgs((Coordinate, Coordinate) boundingCoordinates, List<Coordinate> polygon)
+        {
+            var appSettings = ConfigLoader.LoadFromAppConfig();
+            var tempPath = Path.GetTempFileName();
+            await using (var writer = new StreamWriter(File.OpenWrite(tempPath)))
+            {
+                var jsonAppSettings = JsonConvert.SerializeObject(appSettings);
+                await writer.WriteAsync(jsonAppSettings);
+                writer.Close();
+            }
+
+            var args = ConfigLoader.CreateArgsForPython(tempPath,
+                boundingCoordinates.Item1.Lattitude,
+                boundingCoordinates.Item2.Lattitude,
+                boundingCoordinates.Item1.Longtitude,
+                boundingCoordinates.Item2.Longtitude,
+                polygon);
+            return args;
         }
 
         private async Task<Stream> GetImageStream((string, Guid) titleAndId, string granuleFolderName, string imageId)
