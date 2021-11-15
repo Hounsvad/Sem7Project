@@ -54,8 +54,8 @@ namespace DataCollectorAndProcessor
             {
                 StartInfo =
                 {
-                    FileName = ConfigurationManager.AppSettings.Get("pythonImg"),
-                    ArgumentList = {tmpImgPath, ConfigurationManager.AppSettings.Get("hdfsImageIngestPath")}
+                    FileName = "python3",
+                    ArgumentList = { ConfigurationManager.AppSettings.Get("pythonImg"), tmpImgPath, ConfigurationManager.AppSettings.Get("hdfsImageIngestPath")}
                 }
             };
             python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};

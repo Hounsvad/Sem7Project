@@ -56,8 +56,8 @@ namespace DataCollector
                 {
                     StartInfo =
                     {
-                        FileName = ConfigurationManager.AppSettings.Get("pythonProcessor"),
-                        Arguments = args
+                        FileName = "python3",
+                        ArgumentList = { ConfigurationManager.AppSettings.Get("pythonProcessor"), args}
                     }
                 };
                 python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
