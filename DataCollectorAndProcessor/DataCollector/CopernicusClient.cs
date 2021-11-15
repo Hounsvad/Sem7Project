@@ -72,7 +72,10 @@ namespace DataCollector
                         Arguments = args
                     }
                 };
+                python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
+                python.OutputDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
                 python.Start();
+                await python.WaitForExitAsync();
             }
             catch (Exception e)
             {
