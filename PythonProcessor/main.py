@@ -105,6 +105,7 @@ def validateConfigContents(config: dict):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    print('Python doing stuff')
     # Validate Input
     if len(sys.argv) < 1:
         print("Needs json configuration")
@@ -122,4 +123,5 @@ if __name__ == '__main__':
     # Validate Appsettings
     validateConfigContents(config)
 
+    print('All is valid')
     main(args, config)
