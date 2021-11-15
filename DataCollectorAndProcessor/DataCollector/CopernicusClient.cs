@@ -42,9 +42,11 @@ namespace DataCollector
                 var imageB04Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B04.ToString());
                 var imageB08Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B08.ToString());
 
+                Console.WriteLine("Downloading images");
                 var imageStreamB04 = await GetImageStream(titleAndId, granuleFolderName, imageB04Id);
                 var imageStreamB08 = await GetImageStream(titleAndId, granuleFolderName, imageB08Id);
 
+                Console.WriteLine("Reformatting images in python");
                 await ImageParser.ParseImageStream(imageStreamB04);
                 await ImageParser.ParseImageStream(imageStreamB08);
 
@@ -60,8 +62,10 @@ namespace DataCollector
                 };
                 python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
                 python.OutputDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
+                Console.WriteLine("Processing images with python");
                 python.Start();
                 await python.WaitForExitAsync();
+                Console.WriteLine("Processing done");
             }
             catch (Exception e)
             {
