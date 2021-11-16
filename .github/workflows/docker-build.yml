@@ -2,11 +2,14 @@ name: Docker
 
 on:
   push:
+    branches:
+      - master
   pull_request:
+    branches:
+      - master
 
 jobs:
-  emulator-docker-buildonly:
-    needs: check-emulation-changes
+  docker-build-and-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
