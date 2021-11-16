@@ -1,0 +1,20 @@
+name: Docker
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  emulator-docker-buildonly:
+    needs: check-emulation-changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.PACKAGE_KEY}}" | docker login https://ghcr.io -u hounsvad --password-stdin
+      
+      - name: Build image
+        run: |
+          docker buildx build --push -t ghcr.io/hounsvad/sem7project .
+
