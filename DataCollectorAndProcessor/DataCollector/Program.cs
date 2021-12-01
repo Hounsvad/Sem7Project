@@ -11,6 +11,7 @@ namespace DataCollector
         
         static void Main(string[] args)
         {
+            Console.WriteLine("Program starting");
             var retryInterval = Environment.GetEnvironmentVariable("CopernicusSearchInterval");
             if (string.IsNullOrWhiteSpace(retryInterval))
             {
@@ -23,7 +24,8 @@ namespace DataCollector
                 Console.WriteLine($"CopernicusSearchInterval could not be parsed [{retryInterval}]");
                 return;
             }
-            
+
+            Task.Run(_copernicusClient.Execute);
             Timer checkForTime = new Timer(Loop, null, 0, (long)(int) interval*1000);
 
             Console.ReadLine();
