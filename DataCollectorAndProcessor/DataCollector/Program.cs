@@ -14,11 +14,13 @@ namespace DataCollector
             var retryInterval = Environment.GetEnvironmentVariable("CopernicusSearchInterval");
             if (string.IsNullOrWhiteSpace(retryInterval))
             {
+                Console.WriteLine($"CopernicusSearchInterval is null or whitespace");
                 return;
             }
             
             if (!Enum.TryParse(typeof(SearchIntervalTimes), retryInterval, true, out var interval) || interval == null)
             {
+                Console.WriteLine($"CopernicusSearchInterval could not be parsed [{retryInterval}]");
                 return;
             }
             

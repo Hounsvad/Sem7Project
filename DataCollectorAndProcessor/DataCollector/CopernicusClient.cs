@@ -28,9 +28,15 @@ namespace DataCollector
         {
             try
             {
+                Console.WriteLine("Connecting to Copernicus");
                 var searchResult = await GetSearchResult();
 
-                if (!searchResult.FoundResults()) return;
+
+                if (!searchResult.FoundResults())
+                {
+                    Console.WriteLine("Did not find any new images");
+                    return;
+                }
 
                 var titleAndId = searchResult.GetTitleAndIdOfFirstEntry();
 
