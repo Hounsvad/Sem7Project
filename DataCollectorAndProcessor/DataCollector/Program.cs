@@ -25,7 +25,6 @@ namespace DataCollector
                 return;
             }
 
-            Task.Run(_copernicusClient.Execute);
             Timer checkForTime = new Timer(Loop, null, 0, (long)(int) interval*1000);
 
             Console.ReadLine();
