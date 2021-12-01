@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using Newtonsoft.Json;
@@ -10,15 +11,15 @@ namespace Sem7.Input.DataCollector
     {
         public static AppSettings LoadFromAppConfig() => new AppSettings
         {
-            hdfsImageIngestPath = ConfigurationManager.AppSettings.Get("hdfsImageIngestPath"),
-            hdfsImageIngestRedImage = ConfigurationManager.AppSettings.Get("hdfsImageIngestRedImage"),
-            hdfsImageIngestNirImage = ConfigurationManager.AppSettings.Get("hdfsImageIngestNirImage"),
-            kafkaURL = ConfigurationManager.AppSettings.Get("kafkaURL"),
-            ndviPixelIngestTopic = ConfigurationManager.AppSettings.Get("ndviPixelIngestTopic"),
-            sparkAppName = ConfigurationManager.AppSettings.Get("sparkAppName"),
-            sparkMasterURL = ConfigurationManager.AppSettings.Get("sparkMasterURL"),
-            sparkMaxMemory = ConfigurationManager.AppSettings.Get("sparkMaxMemory"),
-            sparkCheckpointLocationURL = ConfigurationManager.AppSettings.Get("sparkCheckpointLocationURL")
+            hdfsImageIngestPath = Environment.GetEnvironmentVariable("hdfsImageIngestPath"),
+            hdfsImageIngestRedImage = Environment.GetEnvironmentVariable("hdfsImageIngestRedImage"),
+            hdfsImageIngestNirImage = Environment.GetEnvironmentVariable("hdfsImageIngestNirImage"),
+            kafkaURL = Environment.GetEnvironmentVariable("kafkaURL"),
+            ndviPixelIngestTopic = Environment.GetEnvironmentVariable("ndviPixelIngestTopic"),
+            sparkAppName = Environment.GetEnvironmentVariable("sparkAppName"),
+            sparkMasterURL = Environment.GetEnvironmentVariable("sparkMasterURL"),
+            sparkMaxMemory = Environment.GetEnvironmentVariable("sparkMaxMemory"),
+            sparkCheckpointLocationURL = Environment.GetEnvironmentVariable("sparkCheckpointLocationURL")
         };
 
 

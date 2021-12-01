@@ -55,7 +55,7 @@ namespace DataCollectorAndProcessor
                 StartInfo =
                 {
                     FileName = "python3",
-                    ArgumentList = { ConfigurationManager.AppSettings.Get("pythonImg"), tmpImgPath, outPath}
+                    ArgumentList = { Environment.GetEnvironmentVariable("pythonImg"), tmpImgPath, outPath}
                 }
             };
             python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};

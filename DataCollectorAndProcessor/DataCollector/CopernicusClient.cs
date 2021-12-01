@@ -19,10 +19,10 @@ namespace DataCollector
     {
         private HttpClient _client = new HttpClient();
 
-        private readonly string DataAPI = ConfigurationManager.AppSettings.Get("DataAPI");
-        private readonly string APIAuth = ConfigurationManager.AppSettings.Get("APIAuth");
-        private readonly string SearchArea = ConfigurationManager.AppSettings.Get("SearchArea");
-        private readonly string SearchInterval = ConfigurationManager.AppSettings.Get("CopernicusSearchInterval");
+        private readonly string DataAPI = Environment.GetEnvironmentVariable("DataAPI");
+        private readonly string APIAuth = Environment.GetEnvironmentVariable("APIAuth");
+        private readonly string SearchArea = Environment.GetEnvironmentVariable("SearchArea");
+        private readonly string SearchInterval = Environment.GetEnvironmentVariable("CopernicusSearchInterval");
 
         public async Task Execute()
         {
@@ -47,8 +47,8 @@ namespace DataCollector
                 var imageStreamB08 = await GetImageStream(titleAndId, granuleFolderName, imageB08Id);
 
                 Console.WriteLine("Reformatting images in python");
-                await ImageParser.ParseImageStream(imageStreamB04, ConfigurationManager.AppSettings.Get("hdfsImageIngestPath") + "/" + ConfigurationManager.AppSettings.Get("hdfsImageIngestRedImage"));
-                await ImageParser.ParseImageStream(imageStreamB08, ConfigurationManager.AppSettings.Get("hdfsImageIngestPath") + "/" + ConfigurationManager.AppSettings.Get("hdfsImageIngestNirImage"));
+                await ImageParser.ParseImageStream(imageStreamB04, Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" + Environment.GetEnvironmentVariable("hdfsImageIngestRedImage"));
+                await ImageParser.ParseImageStream(imageStreamB08, Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" + Environment.GetEnvironmentVariable("hdfsImageIngestNirImage"));
 
                 var args = await CreatePythonArgs(boundingCoordinates, polygon);
 
@@ -57,7 +57,7 @@ namespace DataCollector
                     StartInfo =
                     {
                         FileName = "python3",
-                        ArgumentList = { ConfigurationManager.AppSettings.Get("pythonProcessor"), args}
+                        ArgumentList = { Environment.GetEnvironmentVariable("pythonProcessor"), args}
                     }
                 };
                 python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};

@@ -11,7 +11,7 @@ namespace DataCollector
         
         static void Main(string[] args)
         {
-            var retryInterval = ConfigurationManager.AppSettings.Get("CopernicusSearchInterval");
+            var retryInterval = Environment.GetEnvironmentVariable("CopernicusSearchInterval");
             if (string.IsNullOrWhiteSpace(retryInterval))
             {
                 return;
