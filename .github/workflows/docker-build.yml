@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: |
           docker buildx build --push -t ghcr.io/hounsvad/sem7ingest .
-  docker-build-and-push-collector-and-processor:
+  docker-build-and-push-dataaccessor:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
