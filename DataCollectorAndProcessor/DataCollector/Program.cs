@@ -8,6 +8,7 @@ namespace DataCollector
     class Program
     {
         private static CopernicusClient _copernicusClient = new CopernicusClient();
+        static ManualResetEvent _quitEvent = new ManualResetEvent(false);
         
         static void Main(string[] args)
         {
@@ -27,7 +28,14 @@ namespace DataCollector
 
             Timer checkForTime = new Timer(Loop, null, 0, (long)(int) interval*1000);
 
-            Console.ReadLine();
+            Console.CancelKeyPress += (sender, eArgs) => {
+                _quitEvent.Set();
+                eArgs.Cancel = true;
+            };
+
+            // kick off asynchronous stuff 
+
+            _quitEvent.WaitOne();
         }
 
         private static void Loop(object sender)
