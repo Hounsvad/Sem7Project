@@ -54,7 +54,7 @@ namespace DataCollectorAndProcessor
             {
                 StartInfo =
                 {
-                    FileName = "obj_decompress",
+                    FileName = "opj_decompress",
                     ArgumentList = { "-i", tmpImgPath, "-o", outPath} //Environment.GetEnvironmentVariable("pythonImg"),
                 }
             };
