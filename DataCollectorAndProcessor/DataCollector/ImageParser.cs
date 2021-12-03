@@ -54,8 +54,8 @@ namespace DataCollectorAndProcessor
             {
                 StartInfo =
                 {
-                    FileName = "python3",
-                    ArgumentList = { Environment.GetEnvironmentVariable("pythonImg"), tmpImgPath, outPath}
+                    FileName = "obj_decompress",
+                    ArgumentList = { "-i", tmpImgPath, "-o", outPath} //Environment.GetEnvironmentVariable("pythonImg"),
                 }
             };
             python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
