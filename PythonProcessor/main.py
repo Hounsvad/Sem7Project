@@ -113,9 +113,9 @@ if __name__ == '__main__':
 
     # Extract Args As Json
     args: dict = json.loads(sys.argv[1])
-
+    
     # Validate Args exists
-    validateArgsContents()
+    validateArgsContents(args)
 
     # Extract config values from appsettings
     config: dict = json.load(open(args["appsettings"]))
