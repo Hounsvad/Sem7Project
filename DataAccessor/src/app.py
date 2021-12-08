@@ -3,7 +3,7 @@ import logging
 from pyhive import hive
 import traceback
 import sys
-conn = hive.Connection(host="hive-server-service", port=10000, username="hive", password="hive", auth='CUSTOM')
+conn = hive.Connection(host="hive-server", port=10000, username="hive", password="hive", auth='CUSTOM')
 app = Flask(__name__)
 
 @app.route("/ndvi", methods=["POST"])
