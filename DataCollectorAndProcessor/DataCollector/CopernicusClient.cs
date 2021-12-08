@@ -52,7 +52,7 @@ namespace DataCollector
                 var imageStreamB04 = await GetImageStream(titleAndId, granuleFolderName, imageB04Id);
                 var imageStreamB08 = await GetImageStream(titleAndId, granuleFolderName, imageB08Id);
 
-                Console.WriteLine("Reformatting images in python");
+                Console.WriteLine("Reformatting images in opj_decompress");
                 await ImageParser.ParseImageStream(imageStreamB04, Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" + Environment.GetEnvironmentVariable("hdfsImageIngestRedImage"));
                 await ImageParser.ParseImageStream(imageStreamB08, Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" + Environment.GetEnvironmentVariable("hdfsImageIngestNirImage"));
 

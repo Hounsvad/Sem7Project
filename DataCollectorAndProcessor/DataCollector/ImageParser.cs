@@ -51,7 +51,9 @@ namespace DataCollectorAndProcessor
             Directory.CreateDirectory(outPath);
             var img = File.OpenWrite(tmpImgPath);
             await imageStream.CopyToAsync(img);
-            var python = new Process()
+            Console.WriteLine($"Image in path: {tmpImgPath}");
+            Console.WriteLine($"Image out path: {outPath}");
+            var opj_decompress = new Process()
             {
                 StartInfo =
                 {
@@ -59,10 +61,11 @@ namespace DataCollectorAndProcessor
                     ArgumentList = { "-i", tmpImgPath, "-o", outPath} //Environment.GetEnvironmentVariable("pythonImg"),
                 }
             };
-            python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
-            python.OutputDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
-            python.Start();
-            await python.WaitForExitAsync();
+            opj_decompress.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
+            opj_decompress.OutputDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
+            opj_decompress.Start();
+            await opj_decompress.WaitForExitAsync();
+            await Task.Delay(10000);
         }
     }
 }
