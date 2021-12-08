@@ -9,6 +9,52 @@ on:
       - master
 
 jobs:
+    check-emulation-changes:
+    name: Check files
+    outputs:
+      run_job: ${{ steps.check_files.outputs.run_job }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: check modified files
+        id: check_files
+        run: |
+          echo "=============== list modified files ==============="
+          git diff --name-only HEAD^ HEAD
+          
+          echo "========== check paths of modified files =========="
+          git diff --name-only HEAD^ HEAD > files.txt
+          while IFS= read -r file
+          do
+            echo $file
+            if [[ $file == DockerfileBaseImage ]]; then
+              echo "DockerfileBaseImage has been modified"
+              echo "::set-output name=run_job::true"
+              break
+            else
+              echo "::set-output name=run_job::false"
+            fi
+          done < files.txt
+
+  docker-build-and-push-baseimage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        if: needs.check-emulation-changes.outputs.run_job == 'true'
+      
+      - name: Log into GitHub Container Registry
+        if: needs.check-emulation-changes.outputs.run_job == 'true'
+        run: echo "${{ secrets.PACKAGE_KEY}}" | docker login https://ghcr.io -u hounsvad --password-stdin
+      
+      - name: Build image
+        if: needs.check-emulation-changes.outputs.run_job == 'true'
+        run: |
+          docker buildx build --push -f DockerfileBaseImage -t ghcr.io/hounsvad/sem7base .
+
   docker-build-and-push-collector-and-processor:
     needs: docker-build-and-push-baseimage
     runs-on: ubuntu-latest
@@ -21,6 +67,7 @@ jobs:
       - name: Build image
         run: |
           docker buildx build --push -t ghcr.io/hounsvad/sem7ingest .
+
   docker-build-and-push-dataaccessor:
     runs-on: ubuntu-latest
     steps:
@@ -32,15 +79,5 @@ jobs:
       - name: Build image
         run: |
           docker buildx build --push -t ghcr.io/hounsvad/sem7dataaccessor DataAccessor
-  docker-build-and-push-baseimage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      
-      - name: Log into GitHub Container Registry
-        run: echo "${{ secrets.PACKAGE_KEY}}" | docker login https://ghcr.io -u hounsvad --password-stdin
-      
-      - name: Build image
-        run: |
-          docker buildx build --push -t ghcr.io/hounsvad/sem7dataaccessor DataAccessor
+
 
