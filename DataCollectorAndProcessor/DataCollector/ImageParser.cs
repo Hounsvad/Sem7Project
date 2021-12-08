@@ -53,6 +53,20 @@ namespace DataCollectorAndProcessor
             await imageStream.CopyToAsync(img);
             Console.WriteLine($"Image in path: {tmpImgPath}");
             Console.WriteLine($"Image out path: {outPath}");
+            
+            var whoami = new Process()
+            {
+                StartInfo =
+                {
+                    FileName = "sh",
+                    ArgumentList = { "-c", "whoami; pwd"}
+                }
+            };
+            whoami.ErrorDataReceived += (sender, args) => { Console.WriteLine(args.Data); };
+            whoami.OutputDataReceived += (sender, args) => { Console.WriteLine(args.Data); };
+            whoami.Start();
+            await whoami.WaitForExitAsync();
+            
             var opj_decompress = new Process()
             {
                 StartInfo =
