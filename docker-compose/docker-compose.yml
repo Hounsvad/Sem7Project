@@ -2,9 +2,12 @@ version: "3.5"
 
 services:
   dataaccessor:
-    build: .
+    image: ghcr.io/hounsvad/sem7dataaccessor:latest
+    restart: always
     ports:
-      - 80:80
+      - 4080:80
+    environment:
+      HIVE_HOSTNAME: "hive"
       
   namenode: #Master (metadata/chunk)
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
@@ -85,9 +88,12 @@ services:
 
   kowl:
     image: quay.io/cloudhut/kowl:master
+    restart: always
     environment:
       KAFKA_BROKERS: "kafka:9092"
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+    ports:
+      - "4082:8080"
 
   spark-master:
     image: bde2020/spark-master:3.1.1-hadoop3.2
@@ -98,17 +104,16 @@ services:
   spark-worker:
     image: bde2020/spark-worker:3.1.1-hadoop3.2
     environment:
-      SPARK_MASTER: "spark://spark:7077"
+      SPARK_MASTER: "spark://spark-master:7077"
   
   ingest:
     image: ghcr.io/hounsvad/sem7ingest:latest
     ports:
-      - "81:81"
+      - "4081:81"
     env_file:
       - ./ingest.env
     
 
-  
 volumes:
   hadoop_namenode:
   hadoop_datanode1:
