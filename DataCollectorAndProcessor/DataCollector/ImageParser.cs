@@ -48,6 +48,7 @@ namespace DataCollectorAndProcessor
         public static async Task ParseImageStream(Stream imageStream, string outPath)
         {
             var tmpImgPath = Path.GetTempFileName().Replace(".tmp", ".jp2");
+            Directory.CreateDirectory(outPath);
             var img = File.OpenWrite(tmpImgPath);
             await imageStream.CopyToAsync(img);
             var python = new Process()
