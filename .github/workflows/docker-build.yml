@@ -10,6 +10,7 @@ on:
 
 jobs:
   docker-build-and-push-collector-and-processor:
+    needs: docker-build-and-push-baseimage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -21,6 +22,17 @@ jobs:
         run: |
           docker buildx build --push -t ghcr.io/hounsvad/sem7ingest .
   docker-build-and-push-dataaccessor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.PACKAGE_KEY}}" | docker login https://ghcr.io -u hounsvad --password-stdin
+      
+      - name: Build image
+        run: |
+          docker buildx build --push -t ghcr.io/hounsvad/sem7dataaccessor DataAccessor
+  docker-build-and-push-baseimage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
