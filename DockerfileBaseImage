@@ -3,5 +3,5 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 RUN apt-get update
-RUN apt-get install -y python3 python3-pip g++ libopenjp2-tools libgraphicsmagick++1-dev libboost-python-dev && rm -rf /var/lib/apt/lists/*
-RUN pip3 install pyspark pgmagick
+RUN apt-get install -y python3 python3-pip g++ libopenjp2-tools libboost-python-dev && rm -rf /var/lib/apt/lists/*
+RUN pip3 install pyspark
