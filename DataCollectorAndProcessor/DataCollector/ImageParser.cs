@@ -49,8 +49,11 @@ namespace DataCollectorAndProcessor
         {
             var tmpImgPath = Path.GetTempFileName().Replace(".tmp", ".jp2");
             Directory.CreateDirectory(outPath);
-            var img = File.OpenWrite(tmpImgPath);
-            await imageStream.CopyToAsync(img);
+            await using (var img = File.OpenWrite(tmpImgPath))
+            {
+                await imageStream.CopyToAsync(img);
+                
+            }
             Console.WriteLine($"Image in path: {tmpImgPath}");
             Console.WriteLine($"Image out path: {outPath}");
             
