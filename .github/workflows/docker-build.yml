@@ -9,7 +9,7 @@ on:
       - master
 
 jobs:
-    check-emulation-changes:
+  check-baseimage-changes:
     name: Check files
     outputs:
       run_job: ${{ steps.check_files.outputs.run_job }}
@@ -41,17 +41,18 @@ jobs:
           done < files.txt
 
   docker-build-and-push-baseimage:
+    needs: check-baseimage-changes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        if: needs.check-emulation-changes.outputs.run_job == 'true'
+        if: needs.check-baseimage-changes.outputs.run_job == 'true'
       
       - name: Log into GitHub Container Registry
-        if: needs.check-emulation-changes.outputs.run_job == 'true'
+        if: needs.check-baseimage-changes.outputs.run_job == 'true'
         run: echo "${{ secrets.PACKAGE_KEY}}" | docker login https://ghcr.io -u hounsvad --password-stdin
       
       - name: Build image
-        if: needs.check-emulation-changes.outputs.run_job == 'true'
+        if: needs.check-baseimage-changess.outputs.run_job == 'true'
         run: |
           docker buildx build --push -f DockerfileBaseImage -t ghcr.io/hounsvad/sem7base .
 
