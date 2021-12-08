@@ -47,10 +47,12 @@ def extractToPixels(valueAlias: str, height: int, width: int, dataframe: DataFra
 def main(args: dict, config: dict):
     spark = getSparkSession(config)
 
+    
+
     redImageDF: DataFrame = spark.read.format("image").load(
-        config["hdfsImageIngestPath"] + config["hdfsImageIngestRedImage"])
+        config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestRedImage"])
     nirImageDF: DataFrame = spark.read.format("image").load(
-        config["hdfsImageIngestPath"] + config["hdfsImageIngestNirImage"])
+        config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestNirImage"])
 
     height: int = redImageDF.select("image.height").collect()[0]["image.height"]
     width: int = redImageDF.select("image.width").collect()[0]["image.width"]
