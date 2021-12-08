@@ -2,8 +2,9 @@ from flask import Flask, request, jsonify
 import logging
 from pyhive import hive
 import traceback
+import os
 import sys
-conn = hive.Connection(host="hive-server", port=10000, username="hive", password="hive", auth='CUSTOM')
+conn = hive.Connection(host=os.environ.get("HIVE_HOSTNAME", "hive"), port=10000, username="hive", password="hive", auth='CUSTOM')
 app = Flask(__name__)
 
 @app.route("/ndvi", methods=["POST"])
