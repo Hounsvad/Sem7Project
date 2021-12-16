@@ -133,6 +133,7 @@ services:
       - ./ingest.env
     volumes:
       - ./main.py:/app/PythonProcessor.py
+      - ./ingest:/tmp
     
 
 volumes:
