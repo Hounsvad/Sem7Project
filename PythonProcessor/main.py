@@ -4,7 +4,12 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import ShortType
 from pyspark.sql.functions import explode, expr, element_at, column, array, col, to_json
 from hdfs import InsecureClient
+from PIL import Image
+import numby as np
+import pandas as pd
+
 import sys
+from time import sleep
 
 
 # This is a sample Python script.
@@ -21,14 +26,9 @@ def getSparkSession(config: dict) -> SparkSession:
     return spark
 
 
-def generateNDVIPixels(redPixelDF: DataFrame, nirPixelDF: DataFrame, xOffset: float, yOffset: float):
-    cond = [redPixelDF.x == nirPixelDF.x,
-            redPixelDF.y == nirPixelDF.y,
-            redPixelDF.height == nirPixelDF.height,
-            redPixelDF.width == nirPixelDF.width, ]
+def generateNDVIPixels(df: DataFrame, xOffset: float, yOffset: float):
 
-    return redPixelDF.join(nirPixelDF, cond) \
-        .withColumn("ndvi", expr("(nirIntensity-redIntensity)/(nirIntensity+redIntensity)")) \
+    return df.withColumn("ndvi", expr("(nir-red)/(nir+red)")) \
         .withColumn("lattitudeTL", expr(f'{args["lat1"]}+({yOffset}*y)')) \
         .withColumn("lattitudeBR", expr(f'{args["lat1"]}+({yOffset}*y)')) \
         .withColumn("longtitudeTL", expr(f'{args["long1"]}+({xOffset}*(y+1))')) \
@@ -46,53 +46,43 @@ def extractToPixels(valueAlias: str, height: int, width: int, dataframe: DataFra
               column("image.width").alias("width"))
 
 def main(args: dict, config: dict):
-    print("Entered main")
+    print("Delaying 1 min", flush=True)
     spark = getSparkSession(config)
-    client = InsecureClient("http://namenode:9870", user='hadoop')
 
-    redImageDFFile = open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestRedImage"], mode="rb")
-    client.write(f'/img/{config["hdfsImageIngestRedImage"]}', redImageDFFile, overwrite=True)
-    print("Uploaded red image")
-    nirImageDFFile = open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestNirImage"], mode="rb")
-    client.write(f'/img/{config["hdfsImageIngestNirImage"]}', nirImageDFFile, overwrite=True)
-    print("Uploaded nir image")
 
     # redImageDF: DataFrame = spark.read.format("image").load(
     #     config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestRedImage"])
     # nirImageDF: DataFrame = spark.read.format("image").load(
     #     config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestNirImage"]),
 
-    redImageDF: DataFrame = spark.read.format("image").load(
-        "hdfs://namenode:9000/img/" + config["hdfsImageIngestRedImage"])
-    print("loaded red image")
-    nirImageDF: DataFrame = spark.read.format("image").load(
-        "hdfs://namenode:9000/img/" + config["hdfsImageIngestNirImage"])
-    print("loaded nir image")
+    redImage: Image.Image = Image.open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestRedImage"])
+    nirImage: Image.Image = Image.open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestNirImage"])
 
-    nirImageDF.show()
-    print("showed nir")
-    redImageDF.show()
-    print("showed red")
-
-
-
-    height: int = redImageDF.select("image.height").collect()[0]["image.height"]
-    width: int = redImageDF.select("image.width").collect()[0]["image.width"]
-    print("Gathered dimensions")
+    height: int = redImage.height
+    width: int = redImage.width
 
     xOffset: int = (args["long2"] - args["long1"]) / width
     yOffset: int = (args["lat2"] - args["lat1"]) / height
-    print("Calculated offsets")
 
+    columns: list = ["red", "nir", "x", "y"]
+    data: list = []
 
-    redDF: DataFrame = extractToPixels("redIntensity", height, width, redImageDF)
-    print(redDF.collect())
-    nirDF: DataFrame = extractToPixels("nirIntensity", height, width, nirImageDF)
-    print(redDF.collect())
-    combinedImageDF: DataFrame = generateNDVIPixels(redDF, nirDF, xOffset, yOffset) \
+    #Extracting pixels from images
+    print("Extracting pixels from images", flush=True)
+    for y in range(0, height):
+        for x in range(0, width):
+            data.append([redImage.getpixel((x, y))[0], nirImage.getpixel((x, y))[0], x, y])
+
+    #Create Dataframe
+    print("Creating dataframe", flush=True)
+    extractedPixels: pd.DataFrame = pd.DataFrame(data, columns)
+
+    sep = spark.createDataFrame(extractedPixels)
+
+    combinedImageDF: DataFrame = generateNDVIPixels(sep, xOffset, yOffset) \
         .withColumn("combined", array(col("ndvi"), col("lattitudeTL"), col("lattitudeBR"), col("longtitudeTL"),
                                       col("longtitudeBR")))
-    print("Created combined image dataframe")
+    print("Created combined image dataframe", flush=True)
     # Export
     combinedImageDF.select(to_json(combinedImageDF.combined).alias("jsonValue")) \
         .selectExpr("CAST(jsonValue AS STRING)") \
@@ -102,7 +92,7 @@ def main(args: dict, config: dict):
         .option("topic", config["ndviPixelIngestTopic"]).outputMode("complete") \
         .start() \
         .awaitTermination()
-    print("Sent to kafka")
+    print("Sent to kafka", flush=True)
 
 def validateArgsContents(args: dict):
     requiredArgsFields: list = ["lat1", "lat2", "long1", "long2", "polygon"]
@@ -132,10 +122,10 @@ def validateConfigContents(config: dict):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print('Python doing stuff')
+    print('Python doing stuff', flush=True)
     # Validate Input
     if len(sys.argv) < 2:
-        print("Needs json configuration")
+        print("Needs json configuration", flush=True)
         exit(1)
 
     # Extract Args As Json
@@ -150,5 +140,5 @@ if __name__ == '__main__':
     # Validate Appsettings
     validateConfigContents(config)
 
-    print('All is valid')
+    print('All is valid', flush=True)
     main(args, config)
