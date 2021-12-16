@@ -42,19 +42,29 @@ namespace DataCollector
 
                 var boundingCoordinates = await GetBoundingCoordinates(titleAndId);
                 var polygon = await GetPolygon(titleAndId);
+                
+                if (!File.Exists(Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
+                                 Environment.GetEnvironmentVariable("hdfsImageIngestRedImage")) &&
+                    !File.Exists(Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
+                                 Environment.GetEnvironmentVariable("hdfsImageIngestNirImage")))
+                {
+                    var granuleFolderName = await GetGranuleFolderName(titleAndId);
 
-                var granuleFolderName = await GetGranuleFolderName(titleAndId);
+                    var imageB04Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B04.ToString());
+                    var imageB08Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B08.ToString());
 
-                var imageB04Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B04.ToString());
-                var imageB08Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B08.ToString());
+                    Console.WriteLine("Downloading images");
+                    var imageStreamB04 = await GetImageStream(titleAndId, granuleFolderName, imageB04Id);
+                    var imageStreamB08 = await GetImageStream(titleAndId, granuleFolderName, imageB08Id);
 
-                Console.WriteLine("Downloading images");
-                var imageStreamB04 = await GetImageStream(titleAndId, granuleFolderName, imageB04Id);
-                var imageStreamB08 = await GetImageStream(titleAndId, granuleFolderName, imageB08Id);
-
-                Console.WriteLine("Reformatting images in opj_decompress");
-                await ImageParser.ParseImageStream(imageStreamB04, Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" + Environment.GetEnvironmentVariable("hdfsImageIngestRedImage"));
-                await ImageParser.ParseImageStream(imageStreamB08, Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" + Environment.GetEnvironmentVariable("hdfsImageIngestNirImage"));
+                    Console.WriteLine("Reformatting images in opj_decompress");
+                    await ImageParser.ParseImageStream(imageStreamB04,
+                        Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
+                        Environment.GetEnvironmentVariable("hdfsImageIngestRedImage"));
+                    await ImageParser.ParseImageStream(imageStreamB08,
+                        Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
+                        Environment.GetEnvironmentVariable("hdfsImageIngestNirImage"));
+                }
 
                 var args = await CreatePythonArgs(boundingCoordinates, polygon);
 
