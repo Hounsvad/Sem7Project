@@ -3,9 +3,7 @@ import os
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import ShortType
 from pyspark.sql.functions import explode, expr, element_at, column, array, col, to_json
-from hdfs import InsecureClient
 from PIL import Image
-import numby as np
 import pandas as pd
 
 import sys
@@ -57,9 +55,12 @@ def main(args: dict, config: dict):
 
     redImage: Image.Image = Image.open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestRedImage"])
     nirImage: Image.Image = Image.open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestNirImage"])
+    print("Opened Images", flush=True)
 
     height: int = redImage.height
     width: int = redImage.width
+    print("Extracted Dimensions", flush=True)
+
 
     xOffset: int = (args["long2"] - args["long1"]) / width
     yOffset: int = (args["lat2"] - args["lat1"]) / height
@@ -72,18 +73,21 @@ def main(args: dict, config: dict):
     for y in range(0, height):
         for x in range(0, width):
             data.append([redImage.getpixel((x, y))[0], nirImage.getpixel((x, y))[0], x, y])
-
+    print("Extracted Pixels", flush=True)
     #Create Dataframe
     print("Creating dataframe", flush=True)
     extractedPixels: pd.DataFrame = pd.DataFrame(data, columns)
 
     sep = spark.createDataFrame(extractedPixels)
+    print("Created Dataframe", flush=True)
 
+    print("Generating ndvi", flush=True)
     combinedImageDF: DataFrame = generateNDVIPixels(sep, xOffset, yOffset) \
         .withColumn("combined", array(col("ndvi"), col("lattitudeTL"), col("lattitudeBR"), col("longtitudeTL"),
                                       col("longtitudeBR")))
     print("Created combined image dataframe", flush=True)
     # Export
+    print("Exporting", flush=True)
     combinedImageDF.select(to_json(combinedImageDF.combined).alias("jsonValue")) \
         .selectExpr("CAST(jsonValue AS STRING)") \
         .writeStream \
