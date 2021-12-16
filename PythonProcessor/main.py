@@ -48,12 +48,12 @@ def extractToPixels(valueAlias: str, height: int, width: int, dataframe: DataFra
 def main(args: dict, config: dict):
     print("Entered main")
     spark = getSparkSession(config)
+    client = InsecureClient("http://namenode:9870", user='hadoop')
 
-    client = InsecureClient("http://namenode:14000")
-    redImageDFFile = open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestRedImage"])
+    redImageDFFile = open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestRedImage"], mode="rb")
     client.write(f'/img/{config["hdfsImageIngestRedImage"]}', redImageDFFile, overwrite=True)
     print("Uploaded red image")
-    nirImageDFFile = open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestNirImage"])
+    nirImageDFFile = open(config["hdfsImageIngestPath"] + "/" + config["hdfsImageIngestNirImage"], mode="rb")
     client.write(f'/img/{config["hdfsImageIngestNirImage"]}', nirImageDFFile, overwrite=True)
     print("Uploaded nir image")
 
