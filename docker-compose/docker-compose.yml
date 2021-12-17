@@ -150,6 +150,8 @@ services:
     image: ghcr.io/hounsvad/sem7kafkatohive
     environment:
       HIVE_HOSTNAME: "hive-server"
+    volumes:
+      - ../kafkaToHivePython/main.py:/app/main.py
 
     
 

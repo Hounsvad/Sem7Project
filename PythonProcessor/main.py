@@ -27,9 +27,9 @@ def getSparkSession(config: dict) -> SparkSession:
 def generateNDVIPixels(df: DataFrame, xOffset: float, yOffset: float):
     return df.withColumn("ndvi", expr("(nir-red)/(nir+red)")) \
         .withColumn("lattitudeTL", expr(f'{args["lat1"]}+({yOffset}*y)')) \
-        .withColumn("lattitudeBR", expr(f'{args["lat1"]}+({yOffset}*y)')) \
+        .withColumn("lattitudeBR", expr(f'{args["lat2"]}+({yOffset}*y)')) \
         .withColumn("longtitudeTL", expr(f'{args["long1"]}+({xOffset}*(y+1))')) \
-        .withColumn("longtitudeBR", expr(f'{args["long1"]}+({xOffset}*(y+1))'))
+        .withColumn("longtitudeBR", expr(f'{args["long2"]}+({xOffset}*(y+1))'))
 
 
 def extractToPixels(valueAlias: str, height: int, width: int, dataframe: DataFrame):
