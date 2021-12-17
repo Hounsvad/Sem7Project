@@ -1,0 +1,1 @@
+docker buildx build --push -t ghcr.io/hounsvad/sem7kafkatohive .

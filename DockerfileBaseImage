@@ -4,4 +4,6 @@ EXPOSE 80
 EXPOSE 443
 RUN apt-get update
 RUN apt-get install -y python3 python3-pip python3-pil python3-pil.imagetk libopenjp2-7-dev libopenjp2-tools openjdk-11-jdk && rm -rf /var/lib/apt/lists/*
-RUN pip3 install pyspark pandas
+RUN pip3 install pyspark==3.1.1
+RUN pip3 install pandas
+RUN pip3 install kafka-python
