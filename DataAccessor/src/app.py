@@ -4,8 +4,11 @@ from pyhive import hive
 import traceback
 import os
 import sys
-conn = hive.Connection(host=os.environ.get("HIVE_HOSTNAME", "hive"), port=10000, username="hive", password="hive", auth='CUSTOM')
+conn = hive.Connection(host=os.environ.get("HIVE_HOSTNAME", "hive-server"), port=10000, username="hive", password="hive", auth='CUSTOM')
 app = Flask(__name__)
+
+conn.execute("create table if not exists ndvi (entrydate string, x1 INT, x2 INT, y1 INT, y2 INT, value SMALLINT, PRIMARY KEY (entrydate, x1, x2, y1, y2) disable novalidate)")
+conn.execute("create table if not exists latestdate (latestdate string)")
 
 @app.route("/ndvi", methods=["POST"])
 def index():
