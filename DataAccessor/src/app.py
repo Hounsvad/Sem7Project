@@ -11,7 +11,7 @@ conn.execute("create table if not exists ndvi (entrydate string, x1 INT, x2 INT,
 conn.execute("create table if not exists latestdate (latestdate string)")
 
 @app.route("/ndvi", methods=["POST"])
-def index():
+def ndvi():
     with conn.cursor() as cur:
         try:
             content = request.get_json(silent=True)
@@ -26,7 +26,7 @@ def index():
             return "", 404
 
 @app.route("/coordinates", methods=["POST"])
-def index():
+def coordinates():
     with conn.cursor() as cur:
         try:
             content = request.get_json(silent=True)

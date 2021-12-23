@@ -16,17 +16,15 @@ import androidx.fragment.app.Fragment;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraIdleListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Dash;
-import com.google.android.gms.maps.model.Dot;
 import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +36,8 @@ import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.tracking.ApiHelper;
 
 public class MapFragment extends Fragment implements
         OnMapReadyCallback,
-        LocationListener {
+        LocationListener,
+        OnCameraIdleListener {
 
     private FragmentMapBinding binding;
     private LocationManager locationManager;
@@ -65,12 +64,18 @@ public class MapFragment extends Fragment implements
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
         googleMap.animateCamera(cameraUpdate);
         locationManager.removeUpdates(this);
+        updateOverlay();
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.googleMap = googleMap;
         //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-23.684, 133.903), 4));
+    }
+
+    @Override
+    public void onCameraIdle() {
+        updateOverlay();
     }
 
     private void updateOverlay(){
@@ -111,4 +116,6 @@ public class MapFragment extends Fragment implements
 
     @Override
     public void onProviderDisabled(String provider) { }
+
+
 }

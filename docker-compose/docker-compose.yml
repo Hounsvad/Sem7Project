@@ -142,7 +142,7 @@ services:
     env_file:
       - ./ingest.env
     volumes:
-      - ./main.py:/app/PythonProcessor.py
+      - ../PythonProcessor/main.py:/app/PythonProcessor.py
       - ./ingest:/tmp
 
   kafka-consumer:
