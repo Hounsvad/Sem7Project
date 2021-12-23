@@ -1,11 +1,17 @@
 package dk.sdu.mmmi.sempro7E21.grpG.outinthegreen;
 
+import android.Manifest;
+import android.app.AlarmManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -14,16 +20,24 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
+
 import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.databinding.ActivityMainBinding;
 import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.tracking.TrackingHandler;
+import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.ui.settings.SettingsActivity;
+import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.ui.settings.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     private TrackingHandler trackingHandler;
+    private AlarmManager alarmManager;
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
+    @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +61,18 @@ public class MainActivity extends AppCompatActivity {
 
         this.trackingHandler = new TrackingHandler(this);
         trackingHandler.handle();
+
+        /*this.alarmManager = ( AlarmManager) this.getSystemService(ALARM_SERVICE);
+        if (! this.alarmManager.canScheduleExactAlarms()){
+            this.requestPermissions(new String[]{Manifest.permission.SCHEDULE_EXACT_ALARM}, 1);
+        }
+
+        LocalDateTime localDateTime = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        long nextMidnightMillis = localDateTime.isBefore(LocalDateTime.now()) ? localDateTime.plusDays(1).toEpochSecond(ZoneOffset.UTC) : localDateTime.toEpochSecond(ZoneOffset.UTC);
+
+
+        this.alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC, nextMidnightMillis, )*/
+
     }
 
     @Override
@@ -61,5 +87,15 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

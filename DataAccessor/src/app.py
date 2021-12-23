@@ -25,6 +25,32 @@ def index():
             traceback.print_exc()
             return "", 404
 
+@app.route("/coordinates", methods=["POST"])
+def index():
+    with conn.cursor() as cur:
+        try:
+            content = request.get_json(silent=True)
+            latNearLeft = int(content['latNearLeft'])
+            longNearLeft = int(content['longNearLeft'])
+            latFarRight = int(content['latFarRight'])
+            longFarRight = int(content['longFarRight'])
+            cur.execute("select latestdate from latestdate")
+            latestdate = cur.fetchone()[0]
+            cur.execute("select x1,y1,x2,y2 from ndvi where entrydate = %s and x1 >= %d and x2 <= %d and y1 >= %d and y2 <= %d", (latestdate, latNearLeft, latFarRight, longNearLeft, longFarRight))
+            coordinates = cursor.fetchall()
+            jsonData=[]
+            for row in coordinates:
+                jsonData.append([
+                    [row[0], row[1]],
+                    [row[0], row[3]],
+                    [row[2], row[3]],
+                    [row[2], row[1]]
+                ])
+            return json.dumps(jsonData), 200
+        except:
+            traceback.print_exc()
+            return "" 404
+
 # Plz no log GPS Cords request in stdout
 app.logger.disabled = True
 log = logging.getLogger('werkzeug')

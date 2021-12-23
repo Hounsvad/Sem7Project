@@ -12,28 +12,45 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.databinding.FragmentStatsBinding;
+import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.tracking.LocalStorageHelper;
 
 public class StatsFragment extends Fragment {
 
-    private StatsViewModel statsViewModel;
     private FragmentStatsBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        statsViewModel =
-                new ViewModelProvider(this).get(StatsViewModel.class);
 
         binding = FragmentStatsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textGallery;
-        statsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+        final GraphView graph = binding.graph;
+        DataPoint[] points = LocalStorageHelper.getActivitiesForToday(this.getActivity())
+                .entrySet()
+                .stream()
+                .map(e -> new DataPoint(LocalDateTime.ofInstant(e.getKey().toInstant(), ZoneOffset.UTC).getHour(), e.getValue()))
+                .collect(Collectors.groupingBy(DataPoint::getX, Collectors.averagingDouble(DataPoint::getY)))
+                .entrySet()
+                .stream()
+                .map(e -> new DataPoint(e.getKey(), e.getValue()))
+                .toArray(DataPoint[]::new);
+
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(points);
+
+        graph.addSeries(series);
         return root;
     }
 

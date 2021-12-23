@@ -17,7 +17,6 @@ public class TrackingHandler {
     private final Activity mainActivity;
     private final LocationManager locationManager;
     private final ApiHelper apiHelper;
-    private final LocalStorageHelper localStorageHelper;
 
     final String[] permissions = {
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION
@@ -27,8 +26,7 @@ public class TrackingHandler {
 
     public TrackingHandler(Activity mainActivity) {
         this.mainActivity = mainActivity;
-        this.apiHelper = new ApiHelper();
-        this.localStorageHelper = new LocalStorageHelper();
+        this.apiHelper = ApiHelper.getInstance();
         this.locationManager = (LocationManager) mainActivity.getSystemService(Context.LOCATION_SERVICE);
     }
 
@@ -45,7 +43,7 @@ public class TrackingHandler {
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(final Location location) {
-            localStorageHelper.storeNDVI(apiHelper.getNDVI(location.getLatitude(), location.getLongitude()), mainActivity);
+            LocalStorageHelper.storeNDVI(apiHelper.getNDVI(location.getLatitude(), location.getLongitude()), mainActivity);
         }
 
         @Override
