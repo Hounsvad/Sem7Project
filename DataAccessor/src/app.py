@@ -41,10 +41,10 @@ def index():
             jsonData=[]
             for row in coordinates:
                 jsonData.append([
-                    [row[0], row[1]],
-                    [row[0], row[3]],
-                    [row[2], row[3]],
-                    [row[2], row[1]]
+                    [row[0] / 1000000, row[1]  / 1000000],
+                    [row[0] / 1000000, row[3] / 1000000],
+                    [row[2] / 1000000, row[3] / 1000000],
+                    [row[2] / 1000000, row[1] / 1000000]
                 ])
             return json.dumps(jsonData), 200
         except:
