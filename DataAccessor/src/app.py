@@ -49,7 +49,7 @@ def coordinates():
             return json.dumps(jsonData), 200
         except:
             traceback.print_exc()
-            return "" 404
+            return "", 404
 
 # Plz no log GPS Cords request in stdout
 app.logger.disabled = True
