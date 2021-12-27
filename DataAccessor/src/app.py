@@ -16,12 +16,12 @@ with conn.cursor() as cur:
 
 @app.route("/ndvi", methods=["POST"])
 def ndvi():
-    with conn.cursor() as cur:
+    
         try:
             content = request.get_json(silent=True)
             longitude = int(content['longitude'])
             latitude = int(content['latitude'])
-            cur.execute("select latestdate from latestdate")
+            cur.execute("select latestdate from latestdate ORDER BY latestdate DESC")
             latestdate = cur.fetchone()[0]
             cur.execute("select value from ndvi where entrydate = %s and x1 <= %d and x2 >= %d and y1 <= %d and y2 >= %d limit 1", (latestdate, latitude, latitude, longitude, longitude))
             return str(cur.fetchone()[0])
