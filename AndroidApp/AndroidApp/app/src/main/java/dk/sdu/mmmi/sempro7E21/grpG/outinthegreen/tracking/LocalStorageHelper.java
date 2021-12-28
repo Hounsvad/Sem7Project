@@ -17,9 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LocalStorageHelper {
-    private static final short THRESHOLD = 50;
+    private static final double THRESHOLD = 0.5;
 
-    public static void storeNDVI(short ndvi, Activity mainActivity) {
+    public static void storeNDVI(double ndvi, Activity mainActivity) {
         if (ndvi > 100 || ndvi < 0){
             return;
         }
@@ -52,7 +52,7 @@ public class LocalStorageHelper {
             while(reader.ready()) {
                 String[] line = reader.readLine().split(": ");
                 String time = line[0];
-                short ndvi = Short.parseShort(line[1]);
+                double ndvi = Double.parseDouble(line[1]);
 
                 if (lastTimestamp != -1L){
                     timeSpent += Long.parseLong(time) - lastTimestamp;
@@ -81,14 +81,14 @@ public class LocalStorageHelper {
         return timeSpent + calculateSecondsSpentInGreenToday(mainActivity);
     }
 
-    public static Map<Date, Short> getActivitiesForToday(Activity mainActivity) {
-        Map<Date, Short> returnValue = new HashMap<>();
+    public static Map<Date, Double> getActivitiesForToday(Activity mainActivity) {
+        Map<Date, Double> returnValue = new HashMap<>();
         try {
             @SuppressLint("SimpleDateFormat") BufferedReader reader  = new BufferedReader(new InputStreamReader(mainActivity.openFileInput("NDVI_"+ new SimpleDateFormat("yyyy-MM-dd").format(new Date()))));
             while(reader.ready()) {
                 String[] line = reader.readLine().split(": ");
                 String time = line[0];
-                short ndvi = Short.parseShort(line[1]);
+                double ndvi = Double.parseDouble(line[1]);
                 returnValue.put(Date.from(Instant.ofEpochSecond(Long.parseLong(time))), ndvi);
             }
             reader.close();

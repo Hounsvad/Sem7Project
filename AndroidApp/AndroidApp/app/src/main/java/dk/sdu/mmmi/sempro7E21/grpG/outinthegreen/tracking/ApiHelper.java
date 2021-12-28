@@ -33,7 +33,7 @@ public class ApiHelper {
         return instance;
     }
 
-    public short getNDVI(double latitude, double longitude) {
+    public double getNDVI(double latitude, double longitude) {
         try {
             MediaType mediaType = MediaType.parse("application/json");
             String json = new JSONObject()
@@ -47,7 +47,7 @@ public class ApiHelper {
                 .addHeader("Content-Type", "application/json")
                 .build();
             Response response = client.newCall(request).execute();
-            return Short.parseShort(response.body().string());
+            return Double.parseDouble(response.body().string());
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             return -100;

@@ -146,6 +146,7 @@ services:
       - ./ingest:/tmp
 
   kafka-consumer:
+    restart: always
     container_name: kafka-consumer
     image: ghcr.io/hounsvad/sem7kafkatohive
     environment:

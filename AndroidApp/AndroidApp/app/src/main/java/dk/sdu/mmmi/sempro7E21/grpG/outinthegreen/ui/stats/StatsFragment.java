@@ -38,7 +38,7 @@ public class StatsFragment extends Fragment {
         View root = binding.getRoot();
 
         final GraphView graph = binding.graph;
-        DataPoint[] points = LocalStorageHelper.getActivitiesForToday(this.getActivity())
+        /*DataPoint[] points = LocalStorageHelper.getActivitiesForToday(this.requireActivity())
                 .entrySet()
                 .stream()
                 .map(e -> new DataPoint(LocalDateTime.ofInstant(e.getKey().toInstant(), ZoneOffset.UTC).getHour(), e.getValue()))
@@ -46,7 +46,19 @@ public class StatsFragment extends Fragment {
                 .entrySet()
                 .stream()
                 .map(e -> new DataPoint(e.getKey(), e.getValue()))
-                .toArray(DataPoint[]::new);
+                .toArray(DataPoint[]::new);*/
+
+        DataPoint[] points = {
+                new DataPoint(9, 0.5),
+                new DataPoint(10, 0.1),
+                new DataPoint(11, 0.2),
+                new DataPoint(12, 0),
+                new DataPoint(13, 0.6),
+                new DataPoint(14, 0),
+                new DataPoint(15, 0),
+                new DataPoint(16, 0.4),
+                new DataPoint(17, 0.075)
+        };
 
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(points);
 

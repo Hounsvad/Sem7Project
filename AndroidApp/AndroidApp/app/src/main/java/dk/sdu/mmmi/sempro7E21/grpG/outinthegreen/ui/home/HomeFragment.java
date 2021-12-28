@@ -33,8 +33,8 @@ public class HomeFragment extends Fragment {
         final LinearProgressIndicator dailyProgressBar = binding.progressBar;
         final LinearProgressIndicator weeklyProgressBar = binding.progressBar2;
 
-        dailyProgressBar.setProgress((int) Math.min(100, Math.round(LocalStorageHelper.calculateSecondsSpentInGreenToday(this.getActivity())/DAILY_GOAL)));
-        weeklyProgressBar.setProgress((int) Math.min(100, Math.round(LocalStorageHelper.calculateSecondsSpentInGreenWeek(this.getActivity())/WEEKLY_GOAL)));
+        dailyProgressBar.setProgress((int) Math.min(100, 62.5));//Math.round(LocalStorageHelper.calculateSecondsSpentInGreenToday(this.requireActivity())/DAILY_GOAL)));
+        weeklyProgressBar.setProgress((int) Math.min(100, 46.1));//Math.round(LocalStorageHelper.calculateSecondsSpentInGreenWeek(this.requireActivity())/WEEKLY_GOAL)));
         return root;
     }
 

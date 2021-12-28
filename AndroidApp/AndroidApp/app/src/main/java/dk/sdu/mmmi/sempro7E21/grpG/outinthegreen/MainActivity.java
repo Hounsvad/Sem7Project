@@ -1,7 +1,9 @@
 package dk.sdu.mmmi.sempro7E21.grpG.outinthegreen;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -26,6 +28,7 @@ import java.time.ZoneOffset;
 import java.util.Date;
 
 import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.databinding.ActivityMainBinding;
+import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.tracking.AlarmReceiver;
 import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.tracking.TrackingHandler;
 import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.ui.settings.SettingsActivity;
 import dk.sdu.mmmi.sempro7E21.grpG.outinthegreen.ui.settings.SettingsFragment;
@@ -37,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private TrackingHandler trackingHandler;
     private AlarmManager alarmManager;
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         this.trackingHandler = new TrackingHandler(this);
         trackingHandler.handle();
 
-        /*this.alarmManager = ( AlarmManager) this.getSystemService(ALARM_SERVICE);
+        this.alarmManager = ( AlarmManager) this.getSystemService(ALARM_SERVICE);
         if (! this.alarmManager.canScheduleExactAlarms()){
             this.requestPermissions(new String[]{Manifest.permission.SCHEDULE_EXACT_ALARM}, 1);
         }
@@ -70,9 +74,12 @@ public class MainActivity extends AppCompatActivity {
         LocalDateTime localDateTime = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
         long nextMidnightMillis = localDateTime.isBefore(LocalDateTime.now()) ? localDateTime.plusDays(1).toEpochSecond(ZoneOffset.UTC) : localDateTime.toEpochSecond(ZoneOffset.UTC);
 
-
-        this.alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC, nextMidnightMillis, )*/
-
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        @SuppressLint("UnspecifiedImmutableFlag") PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        this.alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC,
+                nextMidnightMillis,
+                pendingIntent
+        );
     }
 
     @Override

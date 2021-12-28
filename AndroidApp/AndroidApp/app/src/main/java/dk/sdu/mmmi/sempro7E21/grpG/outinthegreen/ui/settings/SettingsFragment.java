@@ -22,24 +22,14 @@ public class SettingsFragment extends PreferenceFragmentCompat  {
 
         if (dailyHoursPref != null) {
             dailyHoursPref.setOnBindEditTextListener(
-                    new EditTextPreference.OnBindEditTextListener() {
-                        @Override
-                        public void onBindEditText(@NonNull EditText editText) {
-                            editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-                        }
-                    });
+                    editText -> editText.setInputType(InputType.TYPE_CLASS_NUMBER));
         }
 
         EditTextPreference weeklyHoursPref = findPreference("weekly_hours_pref");
 
         if (weeklyHoursPref != null) {
             weeklyHoursPref.setOnBindEditTextListener(
-                    new EditTextPreference.OnBindEditTextListener() {
-                        @Override
-                        public void onBindEditText(@NonNull EditText editText) {
-                            editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-                        }
-                    });
+                    editText -> editText.setInputType(InputType.TYPE_CLASS_NUMBER));
         }
 
         setPreferencesFromResource(R.xml.preferences, rootKey);
