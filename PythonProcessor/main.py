@@ -24,12 +24,13 @@ def getSparkSession(config: dict) -> SparkSession:
     return spark
 
 
+# Should be using lat1 and long1 only, as these are references to the tl corner of the entire image
 def generateNDVIPixels(df: DataFrame, xOffset: float, yOffset: float):
     return df.withColumn("ndvi", expr("(nir-red)/(nir+red)")) \
-        .withColumn("lattitudeTL", expr(f'{args["lat1"]}+({yOffset}*y)')) \
-        .withColumn("lattitudeBR", expr(f'{args["lat2"]}+({yOffset}*y)')) \
-        .withColumn("longtitudeTL", expr(f'{args["long1"]}+({xOffset}*(y+1))')) \
-        .withColumn("longtitudeBR", expr(f'{args["long2"]}+({xOffset}*(y+1))'))
+        .withColumn("lattitudeTL", expr(f'{args["lat1"]}-({yOffset}*y)')) \
+        .withColumn("lattitudeBR", expr(f'{args["lat1"]}-({yOffset}*(y+1))')) \
+        .withColumn("longtitudeTL", expr(f'{args["long1"]}+({xOffset}*x)')) \
+        .withColumn("longtitudeBR", expr(f'{args["long1"]}+({xOffset}*(x+1))'))
 
 
 def extractToPixels(valueAlias: str, height: int, width: int, dataframe: DataFrame):
@@ -44,6 +45,7 @@ def extractToPixels(valueAlias: str, height: int, width: int, dataframe: DataFra
 
 
 def main(args: dict, config: dict):
+    
     print("Creating spark session", flush=True)
     spark = getSparkSession(config)
 
@@ -60,9 +62,11 @@ def main(args: dict, config: dict):
     width: int = redImage.width
     print("Extracted Dimensions", flush=True)
 
-    xOffset: float = (int(args["long2"]) - int(args["long1"])) / width
-    yOffset: float = (int(args["lat2"]) - int(args["lat1"])) / height
 
+    xOffset: float = (float(args["long2"]) - float(args["long1"])) / width
+    yOffset: float = (float(args["lat1"]) - float(args["lat2"])) / height
+    print(f'1: {args["lat1"]}, {args["long1"]}, 2: {args["lat2"]}, {args["long2"]}')
+    print("XOffset: ", str(xOffset), " YOffset: ", str(yOffset))
     columns: list = ["red", "nir", "x", "y"]
 
     # Extracting pixels from images
@@ -70,7 +74,7 @@ def main(args: dict, config: dict):
     isSingleLayer: bool = isinstance(redImage.getpixel((0, 0)), int)
     print(redImage.getpixel((0, 0)), flush=True)
     print("Image type is not multi layer: " + str(isSingleLayer), flush=True)
-    nr_iterations: int = 1098
+    nr_iterations: int = 366
     kafka = KafkaProducer(bootstrap_servers=config["kafkaURL"])
     for iterations in range(nr_iterations):
         data: list = []
@@ -104,7 +108,7 @@ def main(args: dict, config: dict):
                                           col("longtitudeBR")))
         print("Created combined image dataframe", flush=True)
         # Export
-        print("Exporting", flush=True)
+        print("Exporting/Collecting data from spark.", flush=True)
         processedPixels: list = combinedImageDF.select(to_json(combinedImageDF.combined).alias("jsonValue")) \
             .selectExpr("CAST(jsonValue AS STRING)") \
             .toDF("jsonValue") \

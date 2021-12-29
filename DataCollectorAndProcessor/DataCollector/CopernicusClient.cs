@@ -209,7 +209,7 @@ namespace DataCollector
             var response = await _client.GetAsync(
                 $"{DataAPI}/search?q=(footprint:\"Intersects({SearchArea})\" AND platformname:Sentinel-2 AND" +
                 $" processinglevel:Level-2A AND platformserialidentifier:Sentinel-2B AND" +
-                $" ingestiondate:[NOW-1{SearchInterval} TO NOW])"); // AND cloudcoverpercentage:[0 TO 50]
+                $" ingestiondate:[NOW-1{SearchInterval} TO NOW] AND cloudcoverpercentage:[0 TO 5])"); // AND cloudcoverpercentage:[0 TO 50]
             var responseString = await response.Content.ReadAsStringAsync();
 
             return new SearchResult(responseString);
