@@ -6,7 +6,7 @@ namespace DataCollector.CopernicusDataStructures
     public class SearchResult
     {
         private XmlDocument Xml;
-        private readonly int ResultsCount;
+        public readonly int ResultsCount;
         
         public SearchResult(string xmlAsString)
         {
@@ -31,8 +31,13 @@ namespace DataCollector.CopernicusDataStructures
 
         public (string, Guid) GetTitleAndIdOfFirstEntry()
         {
-            var title = Xml.GetElementsByTagName("title")[1]?.InnerText;
-            var id = Xml.GetElementsByTagName("id")[1]?.InnerText;
+            return GetTitleAndIdOfEntry(0);
+        }
+        public (string, Guid) GetTitleAndIdOfEntry(int index = 1)
+        {
+            index++;
+            var title = Xml.GetElementsByTagName("title")[index]?.InnerText;
+            var id = Xml.GetElementsByTagName("id")[index]?.InnerText;
             if (id == null || title == null)
                 throw new ArgumentNullException($"id is null?{id == null}: title is null?{title == null}");
             return (title, Guid.Parse(id));

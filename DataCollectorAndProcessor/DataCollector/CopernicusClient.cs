@@ -26,67 +26,74 @@ namespace DataCollector
 
         public async Task Execute()
         {
-            try
+            Console.WriteLine("Connecting to Copernicus");
+            var searchResult = await GetSearchResult();
+            
+
+            if (!searchResult.FoundResults())
             {
-                Console.WriteLine("Connecting to Copernicus");
-                var searchResult = await GetSearchResult();
+                Console.WriteLine("Did not find any new images");
+                return;
+            }
 
-
-                if (!searchResult.FoundResults())
+            for( int i = 0; i<searchResult.ResultsCount; i++) { 
+                try
                 {
-                    Console.WriteLine("Did not find any new images");
-                    return;
+                    await ExcecuteSingle(searchResult.GetTitleAndIdOfEntry(i));
                 }
-
-                var titleAndId = searchResult.GetTitleAndIdOfFirstEntry();
-
-                var boundingCoordinates = await GetBoundingCoordinates(titleAndId);
-                var polygon = await GetPolygon(titleAndId);
-                
-                if (!File.Exists(Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
-                                 Environment.GetEnvironmentVariable("hdfsImageIngestRedImage")) &&
-                    !File.Exists(Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
-                                 Environment.GetEnvironmentVariable("hdfsImageIngestNirImage")))
+                catch (Exception e)
                 {
-                    var granuleFolderName = await GetGranuleFolderName(titleAndId);
-
-                    var imageB04Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B04.ToString());
-                    var imageB08Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B08.ToString());
-
-                    Console.WriteLine("Downloading images");
-                    var imageStreamB04 = await GetImageStream(titleAndId, granuleFolderName, imageB04Id);
-                    var imageStreamB08 = await GetImageStream(titleAndId, granuleFolderName, imageB08Id);
-
-                    Console.WriteLine("Reformatting images in opj_decompress");
-                    await ImageParser.ParseImageStream(imageStreamB04,
-                        Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
-                        Environment.GetEnvironmentVariable("hdfsImageIngestRedImage"));
-                    await ImageParser.ParseImageStream(imageStreamB08,
-                        Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
-                        Environment.GetEnvironmentVariable("hdfsImageIngestNirImage"));
+                    Console.WriteLine(e.Message + e.StackTrace);
+                    continue;
                 }
+                break;
+            }
+        }
 
-                var args = await CreatePythonArgs(boundingCoordinates, polygon);
+        private async Task ExcecuteSingle((string, Guid) titleAndId )
+        {
+            var boundingCoordinates = await GetBoundingCoordinates(titleAndId);
+            var polygon = await GetPolygon(titleAndId);
 
-                var python = new Process()
-                {
-                    StartInfo =
+            if (!File.Exists(Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
+                             Environment.GetEnvironmentVariable("hdfsImageIngestRedImage")) &&
+                !File.Exists(Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
+                             Environment.GetEnvironmentVariable("hdfsImageIngestNirImage")))
+            {
+                var granuleFolderName = await GetGranuleFolderName(titleAndId);
+
+                var imageB04Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B04.ToString());
+                var imageB08Id = await GetImageId(titleAndId, granuleFolderName, ImageTypes.B08.ToString());
+
+                Console.WriteLine("Downloading images");
+                var imageStreamB04 = await GetImageStream(titleAndId, granuleFolderName, imageB04Id);
+                var imageStreamB08 = await GetImageStream(titleAndId, granuleFolderName, imageB08Id);
+
+                Console.WriteLine("Reformatting images in opj_decompress");
+                await ImageParser.ParseImageStream(imageStreamB04,
+                    Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
+                    Environment.GetEnvironmentVariable("hdfsImageIngestRedImage"));
+                await ImageParser.ParseImageStream(imageStreamB08,
+                    Environment.GetEnvironmentVariable("hdfsImageIngestPath") + "/" +
+                    Environment.GetEnvironmentVariable("hdfsImageIngestNirImage"));
+            }
+
+            var args = await CreatePythonArgs(boundingCoordinates, polygon);
+
+            var python = new Process()
+            {
+                StartInfo =
                     {
                         FileName = "python3",
                         ArgumentList = { Environment.GetEnvironmentVariable("pythonProcessor"), args}
                     }
-                };
-                python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
-                python.OutputDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data);};
-                Console.WriteLine("Processing images with python");
-                python.Start();
-                await python.WaitForExitAsync();
-                Console.WriteLine("Processing done");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message + e.StackTrace);
-            }
+            };
+            python.ErrorDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data); };
+            python.OutputDataReceived += (sender, eventArgs) => { Console.WriteLine(eventArgs.Data); };
+            Console.WriteLine("Processing images with python");
+            python.Start();
+            await python.WaitForExitAsync();
+            Console.WriteLine("Processing done");
         }
 
         private static async Task<string> CreatePythonArgs((Coordinate, Coordinate) boundingCoordinates, List<Coordinate> polygon)
@@ -169,8 +176,8 @@ namespace DataCollector
             var southBound = boundingBox["gmd:southBoundLatitude"]["gco:Decimal"].InnerText;
             var northBound = boundingBox["gmd:northBoundLatitude"]["gco:Decimal"].InnerText;
 
-            var topLeft = new Coordinate(southBound, westBound);
-            var bottomRight = new Coordinate(northBound, eastBound);
+            var topLeft = new Coordinate(northBound, westBound);
+            var bottomRight = new Coordinate(southBound, eastBound);
             
             return (topLeft, bottomRight);
         }
