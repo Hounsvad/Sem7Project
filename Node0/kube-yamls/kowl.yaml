@@ -1,0 +1,45 @@
+#Kowl Service Declaration
+apiVersion: v1
+kind: Service
+metadata:
+  name:  kowl-service
+  labels:
+    name: kowl-service
+spec:
+  selector:
+    app: kowl
+  ports:
+  - name:  name-of-the-port
+    port:  8080
+    targetPort:  8080
+    nodePort: 30088
+  type: NodePort
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kowl-deployment
+  labels:
+    name: kowl-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kowl
+  template:
+    metadata:
+      labels:
+        app: kowl
+    spec:
+      containers:
+      - name: kowl
+        image: quay.io/cloudhut/kowl:master
+        ports:
+        - containerPort: 8080
+        env:
+        - name: "KAFKA_BROKERS"
+          value: "kafka-service:9092"
+        - name: "KAFKA_ZOOKEEPER_CONNECT"
+          value: "zookeeper-service:2181"

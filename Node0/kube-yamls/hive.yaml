@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-server
+spec:
+  ports:
+    - name: one
+      port: 5432
+      targetPort: 5432
+    - name: two
+      port: 10000
+      targetPort: 10000
+  selector:
+    app: hive-server-pod
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-server-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hive-server-pod
+  template:
+    metadata:
+      labels:
+        app: hive-server-pod
+    spec:
+      hostname: hive-server
+      containers:
+        - name: hive-server
+          image: bde2020/hive:2.3.2-postgresql-metastore
+          command: ["/opt/hive/bin/hive", "--service", "hiveserver2", "--hiveconf", "hive.server2.thrift.port=10000", "--hiveconf", "hive.root.logger=INFO,console"]
+          ports:
+            - containerPort: 5432
+            - containerPort: 10000
+          env:
+          - name: HIVE_CORE_CONF_javax_jdo_option_ConnectionURL
+            value: "jdbc:postgresql://hive-metastore/metastore"
+          #- name: SERVICE_PRECONDITION
+          #  value: "hive-metastore:9803"
+          envFrom:
+            - configMapRef:
+                name: hive-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-metastore
+spec:
+  ports:
+    - name: one
+      port: 5432
+      targetPort: 5432
+    - name: two
+      port: 9083
+      targetPort: 9083
+  selector:
+    app: hive-metastore-pod
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-metastore-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hive-metastore-pod
+  template:
+    metadata:
+      labels:
+        app: hive-metastore-pod
+    spec:
+      hostname: hive-metastore
+      containers:
+        - name: hive-metastore
+          image: bde2020/hive:2.3.2-postgresql-metastore
+          #command: ["/opt/hive/bin/hive", "--service", "metastore"]
+          ports:
+            - containerPort: 5432
+            - containerPort: 9083
+          env:
+         # - name: SERVICE_PRECONDITION
+         #   value: "hdfs-namenode:9870 hive-metastore-postgresql:5432"
+          envFrom:
+            - configMapRef:
+                name: hive-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-metastore-postgresql
+spec:
+  ports:
+    - name: one
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: hive-metastore-postgresql-pod
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-metastore-postgresql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hive-metastore-postgresql-pod
+  template:
+    metadata:
+      labels:
+        app: hive-metastore-postgresql-pod
+    spec:
+      hostname: hive-metastore-postgresql
+      containers:
+        - name: hive-metastore-postgresql
+          image: bde2020/hive-metastore-postgresql:2.3.0
+          ports:
+            - containerPort: 5432
+

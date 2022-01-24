@@ -1,0 +1,46 @@
+#Zookeeper service declaration
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-service
+  labels:
+    name: zookeeper-service
+spec:
+  selector:
+    app: zookeeper-pod1
+  ports:
+  - name: client
+    port: 2181
+    protocol: TCP
+  - name: follower
+    port: 2888
+    protocol: TCP
+  - name: leader
+    port: 3888
+    protocol: TCP
+  
+---
+
+#ZooKeeper deployment declaration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper-deployment-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper-pod1
+  template:
+    metadata:
+      labels:
+        app: zookeeper-pod1
+    spec:
+      containers:
+      - name: zoo1
+        image: confluentinc/cp-zookeeper:6.2.0
+        ports:
+          - containerPort: 2181
+        env:
+          - name: ZOOKEEPER_CLIENT_PORT
+            value: "2181"

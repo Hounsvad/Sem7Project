@@ -1,0 +1,254 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hdfs-namenode
+spec:
+  selector:
+    app: hdfs-namenode-pod
+  ports:
+  - name: main
+    port: 9870
+    targetPort: 9870
+  - name: other
+    port: 9000
+    targetPort: 9000
+  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hdfs-datanode-1
+spec:
+  selector:
+    app: hdfs-datanode-pod1
+  ports:
+  - name: main
+    port: 9866
+    targetPort: 9866
+  - name: write
+    port: 9864
+    targetPort: 9864
+  - name: something
+    port: 9867
+    targetPort: 9867  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hdfs-datanode-2
+spec:
+  selector:
+    app: hdfs-datanode-pod2
+  ports:
+  - name: main
+    port: 9866
+    targetPort: 9866
+  - name: write
+    port: 9864
+    targetPort: 9864
+  - name: something
+    port: 9867
+    targetPort: 9867
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hdfs-datanode-3
+spec:
+  selector:
+    app: hdfs-datanode-pod3
+  ports:
+  - name: main
+    port: 9866
+    targetPort: 9866
+  - name: write
+    port: 9864
+    targetPort: 9864
+  - name: something
+    port: 9867
+    targetPort: 9867
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hdfs-namenode-deployment
+spec:
+  selector:
+    matchLabels:
+      app: hdfs-namenode-pod
+  template:
+    metadata:
+      labels:
+        app: hdfs-namenode-pod
+    spec:
+      hostname: hdfs-namenode
+      containers:
+      - name: namenode-container
+        image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+        ports:
+        - containerPort: 9870
+        - containerPort: 9000
+        volumeMounts:
+          - name: hdfs-namenode
+            mountPath: /hadoop/dfs/name
+        env:
+          - name: CLUSTER_NAME
+            value: "test"
+        envFrom:
+          - configMapRef:
+              name: hdfs-config
+      volumes:
+      - name: hdfs-namenode
+        hostPath:
+          path: /sem7/data/namenode/
+          type: Directory
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hdfs-datanode1-deployment
+spec:
+  selector:
+    matchLabels:
+      app: hdfs-datanode-pod1
+  template:
+    metadata:
+      labels:
+        app: hdfs-datanode-pod1
+    spec:
+      hostname: hdfs-datanode-1
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - hdfs-datanode-pod2
+                - hdfs-datanode-pod3
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: datanode-container
+        image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+        ports:
+        - containerPort: 9866
+        - containerPort: 9864
+        - containerPort: 9867
+        volumeMounts:
+          - name: hdfs-datanode
+            mountPath: /hadoop/dfs/data
+        env:
+          - name: SERVICE_PRECONDITION
+            value: "hdfs-namenode:9870"
+        envFrom:
+          - configMapRef:
+              name: hdfs-config
+      volumes:
+      - name: hdfs-datanode
+        hostPath:
+          path: /sem7/data/datanode/1/
+          type: Directory
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hdfs-datanode2-deployment
+spec:
+  selector:
+    matchLabels:
+      app: hdfs-datanode-pod2
+  template:
+    metadata:
+      labels:
+        app: hdfs-datanode-pod2
+    spec:
+      hostname: hdfs-datanode-2
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - hdfs-datanode-pod1
+                - hdfs-datanode-pod3
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: datanode-container
+        image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+        ports:
+        - containerPort: 9866
+        - containerPort: 9864
+        - containerPort: 9867
+        volumeMounts:
+          - name: hdfs-datanode
+            mountPath: /hadoop/dfs/data
+        env:
+          - name: SERVICE_PRECONDITION
+            value: "hdfs-namenode:9870"
+        envFrom:
+          - configMapRef:
+              name: hdfs-config
+      volumes:
+      - name: hdfs-datanode
+        hostPath:
+          path: /sem7/data/datanode/2/
+          type: Directory
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hdfs-datanode3-deployment
+spec:
+  selector:
+    matchLabels:
+      app: hdfs-datanode-pod3
+  template:
+    metadata:
+      labels:
+        app: hdfs-datanode-pod3
+    spec:
+      hostname: hdfs-datanode-3
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - hdfs-datanode-pod1
+                - hdfs-datanode-pod2
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: datanode-container
+        image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+        ports:
+        - containerPort: 9866
+        - containerPort: 9864
+        - containerPort: 9867
+        volumeMounts:
+          - name: hdfs-datanode
+            mountPath: /hadoop/dfs/data
+        env:
+          - name: SERVICE_PRECONDITION
+            value: "hdfs-namenode:9870"
+        envFrom:
+          - configMapRef:
+              name: hdfs-config
+      volumes:
+      - name: hdfs-datanode
+        hostPath:
+          path: /sem7/data/datanode/3/
+          type: Directory

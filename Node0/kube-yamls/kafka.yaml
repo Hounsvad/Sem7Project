@@ -1,0 +1,45 @@
+#Kafka service declaration
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-service
+  labels:
+    name: kafka-service
+spec:
+  ports:
+  - port: 9092
+    name: kafka-port
+    protocol: TCP
+  selector:
+    app: kafka-pod
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-deployment-broker0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-pod
+  template:
+    metadata:
+      labels:
+        app: kafka-pod
+    spec:
+      containers:
+      - name: kafka
+        image: confluentinc/cp-kafka:6.2.0
+        ports:
+          - containerPort: 9092
+        env:
+          - name: KAFKA_ZOOKEEPER_CONNECT
+            value: zookeeper-service:2181
+          - name: KAFKA_ADVERTISED_LISTENERS
+            value: PLAINTEXT://kafka-service:9092
+          - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+            value: "1"
+          - name: KAFKA_PARTITION_ASSIGNMENT_STRATEGY
+            value: org.apache.kafka.clients.consumer.RoundRobinAssignor
